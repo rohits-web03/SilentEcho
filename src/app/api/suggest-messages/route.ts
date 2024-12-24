@@ -1,6 +1,6 @@
 // import OpenAI from 'openai';
 // import { OpenAIStream, StreamingTextResponse } from 'ai';
-// import { NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 
 // const openai = new OpenAI({
 //   apiKey: process.env.OPENAI_API_KEY,
@@ -36,3 +36,7 @@
 //     }
 //   }
 // }
+
+export function GET(req: Request){
+    return NextResponse.json({ message:'Test' }, { status:200 });
+}
