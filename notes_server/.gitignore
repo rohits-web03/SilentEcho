@@ -1,0 +1,30 @@
+# Binaries
+main
+tmp/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Build output
+*.out
+*.test
+
+# Go workspace stuff
+vendor/
+*.mod
+*.sum
+
+# Logs
+*.log
+
+# IDE/editor stuff
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Env files
+.env
