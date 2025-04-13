@@ -11,6 +11,7 @@ import (
 )
 
 var DB *mongo.Database
+var NotesCollection *mongo.Collection
 
 func ConnectDB() {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -29,6 +30,8 @@ func ConnectDB() {
 
 	DB = client.Database("silentecho")
 	log.Println("MongoDB connected")
+	NotesCollection = GetCollection("notes")
+	EnsureNoteSlugIndex(NotesCollection)
 }
 
 func GetCollection(name string) *mongo.Collection {

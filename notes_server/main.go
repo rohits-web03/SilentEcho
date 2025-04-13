@@ -3,7 +3,9 @@ package main
 import (
 	"log"
 	"os"
+	"time"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	"github.com/rohits-web03/SilentEcho/notes_server/handlers"
@@ -20,18 +22,31 @@ func main() {
 	utils.ConnectDB()
 
 	// Initialize Gin
-	r := gin.Default()
+	router := gin.Default()
+
+	config := cors.Config{
+		AllowOrigins: []string{"*"},
+		// AllowOrigins: []string{"http://localhost:3000"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Length", "Content-Type", "Authorization"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
+	}
+
+	router.Use(cors.New(config))
 
 	// Routes
-	r.POST("/note", handlers.CreateNote)
-	r.GET("/note/:id", handlers.GetNote)
-	r.GET("/", handlers.Welcome)
+	router.POST("api/note", handlers.CreateNote)
+	router.GET("api/note/:slug", handlers.GetNote)
+	router.GET("/api/notes/user/:userId", handlers.GetUserNotes)
+	router.GET("api/", handlers.Welcome)
 
 	// Start server
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
 	}
-	log.Println("🚀 Server running on port " + port)
-	r.Run(":" + port)
+	log.Println("Server running on port " + port)
+	router.Run(":" + port)
 }
