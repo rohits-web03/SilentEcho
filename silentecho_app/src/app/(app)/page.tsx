@@ -60,7 +60,7 @@ export default function Home() {
 
       {/* Footer */}
       <footer className="text-center p-4 md:p-6 bg-gray-900 text-white">
-        © 2024 SilentEcho All rights reserved.
+        © {new Date().getFullYear()} SilentEcho. All rights reserved.
       </footer>
     </>
   );
