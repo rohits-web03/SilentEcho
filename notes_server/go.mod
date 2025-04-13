@@ -1,6 +1,6 @@
 module github.com/rohits-web03/SilentEcho/notes_server
 
-go 1.24.2
+go 1.24
 
 require (
 	github.com/gin-gonic/gin v1.10.0
