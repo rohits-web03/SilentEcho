@@ -7,7 +7,7 @@ import { Loader2, RefreshCcw, PlusCircle } from 'lucide-react';
 import axios, { AxiosError } from 'axios';
 import React, { useCallback, useEffect, useState } from 'react';
 import { Note } from '@/model/Note';
-import { ApiResponse } from '@/types/ApiResponse';
+import { ApiResponse, GoApiResponse } from '@/types/ApiResponse';
 import { useSession } from 'next-auth/react';
 import { User } from 'next-auth';
 import { NoteCard } from '@/components/NoteCard';
@@ -24,11 +24,11 @@ export default function CipherNotesDashboard() {
     const fetchNotes = useCallback(async () => {
         setIsLoading(true);
         try {
-            const response = await axios.get(`${process.env.NEXT_PUBLIC_GOSERVER_BASE_URL}/api/notes/user/${session?.user._id}`);
-            console.log(response);
-            setNotes(response.data || []);
+            const response = await axios.get<GoApiResponse>(`${process.env.NEXT_PUBLIC_GOSERVER_BASE_URL}/api/notes/user/${session?.user._id}`);
+            const { data: apiData } = response;
+            setNotes(apiData.data || []);
         } catch (error) {
-            const axiosError = error as AxiosError;
+            const axiosError = error as AxiosError<GoApiResponse>;
             toast({
                 title: 'Error',
                 description: axiosError.response?.data.message ?? 'Failed to fetch notes',
@@ -81,7 +81,7 @@ export default function CipherNotesDashboard() {
                 {notes.length > 0 ? (
                     notes.map((note) => (
                         <NoteCard
-                            key={note._id}
+                            key={note.slug}
                             note={note}
                             onDelete={handleDeleteNote}
                         />

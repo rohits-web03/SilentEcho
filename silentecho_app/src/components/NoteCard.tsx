@@ -26,20 +26,21 @@ export function NoteCard({ note, onDelete }: NoteCardProps) {
     };
 
     const handleDelete = async () => {
-        try {
-            await axios.delete(`/api/notes/${note.slug}`);
-            toast({
-                title: 'Note Deleted',
-                description: 'The note has been removed.',
-            });
-            onDelete(note._id);
-        } catch (err) {
-            toast({
-                title: 'Error',
-                description: 'Failed to delete note.',
-                variant: 'destructive',
-            });
-        }
+        console.log("Deleting Note...");
+        // try {
+        //     await axios.delete(`/api/notes/${note.slug}`);
+        //     toast({
+        //         title: 'Note Deleted',
+        //         description: 'The note has been removed.',
+        //     });
+        //     onDelete(note._id);
+        // } catch (err) {
+        //     toast({
+        //         title: 'Error',
+        //         description: 'Failed to delete note.',
+        //         variant: 'destructive',
+        //     });
+        // }
     };
 
     return (

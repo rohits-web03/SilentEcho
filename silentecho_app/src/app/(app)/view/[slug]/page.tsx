@@ -5,12 +5,7 @@ import { useParams } from 'next/navigation';
 import axios from 'axios';
 
 import { decryptNote } from '@/lib/utils';
-
-interface NoteData {
-    ciphernote: string;
-    createdAt?: string;
-    expiresAt?: string | null;
-}
+import { NoteData } from '@/types/ApiResponse';
 
 export default function Page() {
     const params = useParams();
