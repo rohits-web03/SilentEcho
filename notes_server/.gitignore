@@ -13,8 +13,6 @@ tmp/
 
 # Go workspace stuff
 vendor/
-*.mod
-*.sum
 
 # Logs
 *.log
