@@ -13,9 +13,13 @@ import (
 )
 
 func main() {
-	// Load .env
-	if err := godotenv.Load(); err != nil {
-		log.Fatal("Error loading .env file")
+	if os.Getenv("RENDER") == "" {
+		log.Println("Running in development mode, loading .env")
+		if err := godotenv.Load(); err != nil {
+			log.Println("No .env file found")
+		}
+	} else {
+		log.Println("Running in production mode (Render)")
 	}
 
 	// Connect to MongoDB
