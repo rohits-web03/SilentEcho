@@ -83,7 +83,7 @@ export default function DashboardHome() {
         className="mb-10"
       >
         <h1 className="text-3xl md:text-4xl font-bold mb-2">Welcome back, {username}!</h1>
-        <p className="text-muted-foreground">Here's what's happening with your account</p>
+        <p className="text-muted-foreground">Here&apos;s what&apos;s happening with your account</p>
       </motion.div>
 
       <motion.div 

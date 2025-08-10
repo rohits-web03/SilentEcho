@@ -24,7 +24,7 @@ export default function Page() {
                 setPassword(hash.substring(1)); // Remove leading '#'
             }
         }
-    }, []);
+    }, [setPassword]);
 
     // Fetch Note Data when Slug is Available
     useEffect(() => {
@@ -107,7 +107,7 @@ export default function Page() {
             setError("Password missing from URL fragment (e.g., add #yourPassword to the end of the URL).");
         }
 
-    }, [noteCiphertext, password, attemptDecryption]);
+    }, [noteCiphertext, password, attemptDecryption, error, isLoading]);
 
     return (
         <div className="container mx-auto p-4 max-w-2xl">

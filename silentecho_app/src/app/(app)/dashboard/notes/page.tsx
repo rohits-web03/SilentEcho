@@ -24,6 +24,8 @@ export default function CipherNotesDashboard() {
     const { data: session } = useSession();
 
     const fetchNotes = useCallback(async () => {
+        if (!session?.user?._id) return;
+        
         setIsLoading(true);
         try {
             const response = await axios.get<GoApiResponse>(`${process.env.NEXT_PUBLIC_GOSERVER_BASE_URL}/api/notes/user/${session?.user._id}`);
@@ -39,12 +41,12 @@ export default function CipherNotesDashboard() {
         } finally {
             setIsLoading(false);
         }
-    }, [toast]);
+    }, [toast, session?.user?._id]);
 
     useEffect(() => {
         if (!session || !session.user) return;
         fetchNotes();
-    }, [session, fetchNotes]);
+    }, [session, fetchNotes, session?.user?._id]);
 
     const handleDeleteNote = (noteId: string) => {
         setNotes(notes.filter((note) => note._id !== noteId));
