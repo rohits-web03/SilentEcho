@@ -19,7 +19,8 @@ import {
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/components/ui/use-toast';
 import axios, { AxiosError } from 'axios';
-import { Loader2 } from 'lucide-react';
+import { ArrowRight, Loader2 } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { signUpSchema } from '@/schemas/signUpSchema';
 
@@ -98,14 +99,27 @@ export default function SignUpForm() {
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-800">
-      <div className="w-full max-w-md p-8 space-y-8 bg-white rounded-lg shadow-md">
-        <div className="text-center">
-          <h1 className="text-4xl font-extrabold tracking-tight lg:text-5xl mb-6">
-            Join SilentEcho
-          </h1>
-          <p className="mb-4">Sign up to start your anonymous adventure</p>
-        </div>
+    <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-background">
+      <div className="container relative flex flex-col items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
+        <div className="w-full max-w-md space-y-8 rounded-2xl bg-card p-8 shadow-lg backdrop-blur-sm">
+          <div className="text-center">
+            <motion.h1 
+              className="text-3xl font-bold tracking-tight sm:text-4xl bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent"
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              Join SilentEcho
+            </motion.h1>
+            <motion.p 
+              className="mt-3 text-muted-foreground"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.1, duration: 0.5 }}
+            >
+              Sign up to start your anonymous adventure
+            </motion.p>
+          </div>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <FormField
@@ -161,25 +175,43 @@ export default function SignUpForm() {
                 </FormItem>
               )}
             />
-            <Button type="submit" className='w-full' disabled={isSubmitting}>
+            <Button 
+              type="submit" 
+              className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 transition-all transform hover:-translate-y-0.5 hover:shadow-lg"
+              disabled={isSubmitting}
+            >
               {isSubmitting ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Please wait
+                  Creating account...
                 </>
               ) : (
-                'Sign Up'
+                <span className="flex items-center">
+                  Get Started <ArrowRight className="ml-2 h-4 w-4" />
+                </span>
               )}
             </Button>
           </form>
         </Form>
-        <div className="text-center mt-4">
-          <p>
-            Already a member?{' '}
-            <Link href="/sign-in" className="text-blue-600 hover:text-blue-800">
-              Sign in
+          <div className="relative mt-6">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t border-border" />
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="bg-card px-2 text-muted-foreground">
+                Already have an account?
+              </span>
+            </div>
+          </div>
+          <Button 
+            asChild 
+            variant="outline" 
+            className="w-full mt-4 hover:bg-accent/50 transition-colors"
+          >
+            <Link href="/sign-in">
+              Sign in to your account
             </Link>
-          </p>
+          </Button>
         </div>
       </div>
     </div>
