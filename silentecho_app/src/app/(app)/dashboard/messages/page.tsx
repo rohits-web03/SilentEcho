@@ -2,6 +2,7 @@
 
 import { MessageCard } from '@/components/MessageCard';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/components/ui/use-toast';
@@ -9,11 +10,13 @@ import { Message } from '@/model/User';
 import { ApiResponse } from '@/types/ApiResponse';
 import { zodResolver } from '@hookform/resolvers/zod';
 import axios, { AxiosError } from 'axios';
-import { Loader2, RefreshCcw } from 'lucide-react';
+import { Copy, Loader2, MailQuestion, RefreshCcw } from 'lucide-react';
 import { User } from 'next-auth';
 import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { motion } from 'framer-motion';
 import { acceptMessageSchema } from '@/schemas/acceptMessageSchema';
 
 function UserMessagesDashboard() {
@@ -134,60 +137,114 @@ function UserMessagesDashboard() {
     };
 
     return (
-        <div className="my-8 mx-4 md:mx-8 lg:mx-auto p-6 bg-white rounded w-full max-w-6xl">
-            <h1 className="text-4xl font-bold mb-4">User Dashboard</h1>
+        <div className="w-full">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
+                <div>
+                    <h1 className="text-3xl font-bold tracking-tight">Your Inbox</h1>
+                    <p className="text-muted-foreground">
+                        {messages.length > 0
+                            ? `You have ${messages.length} ${messages.length === 1 ? 'message' : 'messages'}`
+                            : 'No messages yet'}
+                    </p>
+                </div>
 
-            <div className="mb-4">
-                <h2 className="text-lg font-semibold mb-2">Copy Your Unique Link</h2>{' '}
-                <div className="flex items-center">
-                    <input
-                        type="text"
-                        value={profileUrl}
-                        disabled
-                        className="input input-bordered w-full p-2 mr-2"
-                    />
-                    <Button onClick={copyToClipboard}>Copy</Button>
+                <div className="flex items-center space-x-4">
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={(e) => {
+                            e.preventDefault();
+                            fetchMessages(true);
+                        }}
+                        disabled={isLoading || isSwitchLoading}
+                    >
+                        {isLoading ? (
+                            <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                        ) : (
+                            <RefreshCcw className="h-4 w-4 mr-2" />
+                        )}
+                        Refresh
+                    </Button>
+
+                    <div className="flex items-center space-x-2 bg-muted/50 px-3 py-1.5 rounded-md">
+                        <Switch
+                            id="accept-messages"
+                            checked={acceptMessages}
+                            onCheckedChange={handleSwitchChange}
+                            disabled={isSwitchLoading}
+                        />
+                        <label htmlFor="accept-messages" className="text-sm font-medium">
+                            Accepting Messages: {acceptMessages ? 'On' : 'Off'}
+                        </label>
+                    </div>
                 </div>
             </div>
 
-            <div className="mb-4">
-                <Switch
-                    {...register('acceptMessages')}
-                    checked={acceptMessages}
-                    onCheckedChange={handleSwitchChange}
-                    disabled={isSwitchLoading}
-                />
-                <span className="ml-2">
-                    Accept Messages: {acceptMessages ? 'On' : 'Off'}
-                </span>
-            </div>
-            <Separator />
+            <Card className="mb-8">
+                <CardHeader>
+                    <CardTitle>Your Unique Link</CardTitle>
+                    <CardDescription>
+                        Share this link to receive anonymous messages
+                    </CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <div className="flex flex-col sm:flex-row gap-2">
+                        <div className="relative flex-1">
+                            <input
+                                type="text"
+                                value={profileUrl}
+                                readOnly
+                                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 pr-10"
+                            />
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                className="absolute right-0 top-0 h-full px-3"
+                                onClick={copyToClipboard}
+                            >
+                                <Copy className="h-4 w-4" />
+                                <span className="sr-only">Copy link</span>
+                            </Button>
+                        </div>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            className="shrink-0"
+                            onClick={copyToClipboard}
+                        >
+                            <Copy className="h-4 w-4 mr-2" />
+                            Copy
+                        </Button>
+                    </div>
+                </CardContent>
+            </Card>
 
-            <Button
-                className="mt-4"
-                variant="outline"
-                onClick={(e) => {
-                    e.preventDefault();
-                    fetchMessages(true);
-                }}
-            >
-                {isLoading ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                    <RefreshCcw className="h-4 w-4" />
-                )}
-            </Button>
-            <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-6">
                 {messages.length > 0 ? (
-                    messages.map((message, index) => (
-                        <MessageCard
-                            key={message._id as React.Key}
-                            message={message}
-                            onMessageDelete={handleDeleteMessage}
-                        />
-                    ))
+                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                        {messages.map((message, index) => (
+                            <motion.div
+                                key={message._id as React.Key}
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: index * 0.05 }}
+                            >
+                                <MessageCard
+                                    message={message}
+                                    onMessageDelete={handleDeleteMessage}
+                                />
+                            </motion.div>
+                        ))}
+                    </div>
                 ) : (
-                    <p>No messages to display.</p>
+                    <div className="flex flex-col items-center justify-center py-12 text-center">
+                        <MailQuestion className="h-12 w-12 text-muted-foreground mb-4" />
+                        <h3 className="text-lg font-medium mb-1">No messages yet</h3>
+                        <p className="text-sm text-muted-foreground max-w-md">
+                            Share your unique link to start receiving anonymous messages
+                        </p>
+                    </div>
                 )}
             </div>
         </div>

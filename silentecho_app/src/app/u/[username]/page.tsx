@@ -96,83 +96,100 @@ export default function SendMessage() {
   // };
 
   return (
-    <div className="container mx-auto my-8 p-6 bg-white rounded max-w-4xl">
-      <h1 className="text-4xl font-bold mb-6 text-center">
-        Public Profile Link
-      </h1>
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <FormField
-            control={form.control}
-            name="content"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Send Anonymous Message to @{username}</FormLabel>
-                <FormControl>
-                  <Textarea
-                    placeholder="Write your anonymous message here"
-                    className="resize-none"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <div className="flex justify-center">
-            {isLoading ? (
-              <Button disabled>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Please wait
-              </Button>
-            ) : (
-              <Button type="submit" disabled={isLoading || !messageContent}>
-                Send It
-              </Button>
-            )}
+    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-2xl mx-auto">
+        <div className="bg-card rounded-xl shadow-lg overflow-hidden border border-border/50">
+          {/* Header */}
+          <div className="bg-primary/5 p-6 text-center border-b border-border/50">
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
+              Send Anonymous Message
+            </h1>
+            <p className="mt-2 text-muted-foreground">
+              Your message will be delivered to @{username} privately
+            </p>
           </div>
-        </form>
-      </Form>
 
-      {/* <div className="space-y-4 my-8">
-        <div className="space-y-2">
-          <Button
-            onClick={fetchSuggestedMessages}
-            className="my-4"
-            disabled={isSuggestLoading}
-          >
-            Suggest Messages
-          </Button>
-          <p>Click on any message below to select it.</p>
-        </div>
-        <Card>
-          <CardHeader>
-            <h3 className="text-xl font-semibold">Messages</h3>
-          </CardHeader>
-          <CardContent className="flex flex-col space-y-4">
-            {error ? (
-              <p className="text-red-500">{error.message}</p>
-            ) : (
-              parseStringMessages(completion).map((message, index) => (
-                <Button
-                  key={index}
-                  variant="outline"
-                  className="mb-2"
-                  onClick={() => handleMessageClick(message)}
+          {/* Message Form */}
+          <div className="p-6 sm:p-8">
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                <FormField
+                  control={form.control}
+                  name="content"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-base font-medium text-foreground/80">
+                        Your Message
+                      </FormLabel>
+                      <FormControl>
+                        <Textarea
+                          placeholder="Write your anonymous message here..."
+                          className="min-h-[120px] text-base border-border/70 focus-visible:ring-2 focus-visible:ring-primary/50"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage className="text-sm" />
+                    </FormItem>
+                  )}
+                />
+
+                <div className="pt-2">
+                  {isLoading ? (
+                    <Button 
+                      className="w-full py-6 text-base font-medium transition-all"
+                      disabled
+                    >
+                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                      Sending your message...
+                    </Button>
+                  ) : (
+                    <Button 
+                      type="submit" 
+                      disabled={isLoading || !messageContent}
+                      className="w-full py-6 text-base font-medium transition-all hover:shadow-lg hover:-translate-y-0.5"
+                      size="lg"
+                    >
+                      Send Anonymously
+                    </Button>
+                  )}
+                </div>
+              </form>
+            </Form>
+
+            {/* Divider with text */}
+            <div className="relative my-8">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t border-border/50"></span>
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-card px-2 text-muted-foreground">
+                  Want your own message board?
+                </span>
+              </div>
+            </div>
+
+            {/* CTA Section */}
+            <div className="text-center">
+              <p className="text-muted-foreground mb-4">
+                Create your account and start receiving anonymous messages
+              </p>
+              <Link href="/sign-up">
+                <Button 
+                  variant="outline" 
+                  className="w-full border-primary/30 text-foreground/90 hover:bg-primary/5 hover:border-primary/50 transition-colors"
+                  size="lg"
                 >
-                  {message}
+                  Create Your Account
                 </Button>
-              ))
-            )}
-          </CardContent>
-        </Card>
-      </div> */}
-      <Separator className="my-6" />
-      <div className="text-center">
-        <div className="mb-4">Get Your Message Board</div>
-        <Link href={'/sign-up'}>
-          <Button>Create Your Account</Button>
-        </Link>
+              </Link>
+            </div>
+          </div>
+        </div>
+
+        {/* Footer Note */}
+        <p className="mt-6 text-center text-sm text-muted-foreground">
+          All messages are end-to-end encrypted and completely anonymous
+        </p>
       </div>
     </div>
   );

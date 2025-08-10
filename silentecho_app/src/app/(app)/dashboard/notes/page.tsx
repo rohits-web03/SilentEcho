@@ -1,9 +1,10 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/components/ui/use-toast';
-import { Loader2, RefreshCcw, PlusCircle } from 'lucide-react';
+import { FileText, Loader2, PlusCircle, RefreshCcw } from 'lucide-react';
 import axios, { AxiosError } from 'axios';
 import React, { useCallback, useEffect, useState } from 'react';
 import { Note } from '@/model/Note';
@@ -12,6 +13,7 @@ import { useSession } from 'next-auth/react';
 import { User } from 'next-auth';
 import { NoteCard } from '@/components/NoteCard';
 import CreateNoteDialog from '@/components/CreateNoteDialog';
+import { motion } from 'framer-motion';
 
 export default function CipherNotesDashboard() {
     const [notes, setNotes] = useState<Note[]>([]);
@@ -53,43 +55,83 @@ export default function CipherNotesDashboard() {
     }
 
     return (
-        <div className="my-8 mx-4 md:mx-8 lg:mx-auto p-6 bg-white rounded w-full max-w-6xl">
-            <div className="flex items-center justify-between mb-4">
-                <h1 className="text-4xl font-bold">Cipher Notes</h1>
-                <Button onClick={() => setShowDialog(true)}>
-                    <PlusCircle className="mr-2 h-5 w-5" />
-                    New Note
-                </Button>
+        <div className="w-full">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
+                <div>
+                    <h1 className="text-3xl font-bold tracking-tight">Cipher Notes</h1>
+                    <p className="text-muted-foreground">
+                        {notes.length > 0 
+                            ? `You have ${notes.length} ${notes.length === 1 ? 'note' : 'notes'}`
+                            : 'No notes yet'}
+                    </p>
+                </div>
+                
+                <div className="flex items-center space-x-4">
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={fetchNotes}
+                        disabled={isLoading}
+                    >
+                        {isLoading ? (
+                            <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                        ) : (
+                            <RefreshCcw className="h-4 w-4 mr-2" />
+                        )}
+                        Refresh
+                    </Button>
+                    
+                    <Button 
+                        onClick={() => setShowDialog(true)}
+                        size="sm"
+                        className="bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white"
+                    >
+                        <PlusCircle className="h-4 w-4 mr-2" />
+                        New Note
+                    </Button>
+                </div>
             </div>
 
-            <Separator />
-
-            <div className="flex items-center justify-between mt-4">
-                <p className="text-muted-foreground">
-                    These are your encrypted notes. Share them with a password.
-                </p>
-                <Button variant="outline" onClick={fetchNotes}>
-                    {isLoading ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                        <RefreshCcw className="h-4 w-4" />
-                    )}
-                </Button>
-            </div>
-
-            <div className="my-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-6">
                 {notes.length > 0 ? (
-                    notes.map((note) => (
-                        <NoteCard
-                            key={note.slug}
-                            note={note}
-                            onDelete={handleDeleteNote}
-                        />
-                    ))
+                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                        {notes.map((note, index) => (
+                            <motion.div
+                                key={note.slug}
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: index * 0.05 }}
+                            >
+                                <NoteCard
+                                    note={note}
+                                    onDelete={handleDeleteNote}
+                                />
+                            </motion.div>
+                        ))}
+                    </div>
                 ) : (
-                    <p>No encrypted notes found.</p>
+                    <Card className="border-dashed">
+                        <CardContent className="flex flex-col items-center justify-center py-12 text-center">
+                            <div className="bg-emerald-100 dark:bg-emerald-900/20 p-3 rounded-full mb-4">
+                                <FileText className="h-8 w-8 text-emerald-600 dark:text-emerald-400" />
+                            </div>
+                            <h3 className="text-lg font-medium mb-1">No notes yet</h3>
+                            <p className="text-sm text-muted-foreground max-w-md mb-4">
+                                Create your first encrypted note to get started
+                            </p>
+                            <Button 
+                                onClick={() => setShowDialog(true)}
+                                className="mt-2"
+                                size="sm"
+                            >
+                                <PlusCircle className="h-4 w-4 mr-2" />
+                                Create Note
+                            </Button>
+                        </CardContent>
+                    </Card>
                 )}
             </div>
+
             <CreateNoteDialog
                 userId={session.user._id}
                 open={showDialog}
