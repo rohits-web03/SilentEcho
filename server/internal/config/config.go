@@ -1,6 +1,7 @@
 package config
 
 import (
+	"log"
 	"os"
 	"time"
 
@@ -19,7 +20,14 @@ type Config struct {
 var Envs = initConfig()
 
 func initConfig() Config {
-	godotenv.Load()
+	if os.Getenv("RENDER") == "" {
+		log.Println("Running in development mode, loading .env")
+		if err := godotenv.Load(); err != nil {
+			log.Println("No .env file found")
+		}
+	} else {
+		log.Println("Running in production mode (Render)")
+	}
 
 	return Config{
 		GINMode:    getEnv("GIN_MODE", "debug"),
