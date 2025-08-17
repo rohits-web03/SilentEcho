@@ -5,12 +5,12 @@ import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
 import { Lock, MailQuestion, ArrowRight, MessageSquare, FileText, Shield, Share2, Bell, Copy } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { useSession } from 'next-auth/react';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function DashboardHome() {
   const router = useRouter();
-  const { data: session } = useSession();
-  const username = session?.user?.username || 'User';
+  const { user } = useAuth();
+  const username = user?.username || 'User';
 
   const features = [
     {
@@ -59,8 +59,8 @@ export default function DashboardHome() {
 
   const item = {
     hidden: { opacity: 0, y: 20 },
-    show: { 
-      opacity: 1, 
+    show: {
+      opacity: 1,
       y: 0,
       transition: {
         duration: 0.4
@@ -76,7 +76,7 @@ export default function DashboardHome() {
 
   return (
     <div className="w-full">
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
@@ -86,7 +86,7 @@ export default function DashboardHome() {
         <p className="text-muted-foreground">Here&apos;s what&apos;s happening with your account</p>
       </motion.div>
 
-      <motion.div 
+      <motion.div
         variants={container}
         initial="hidden"
         animate="show"
@@ -94,7 +94,7 @@ export default function DashboardHome() {
       >
         {features.map((feature, index) => (
           <motion.div key={index} variants={item}>
-            <Card 
+            <Card
               className="h-full cursor-pointer group transition-all duration-300 hover:shadow-lg hover:border-primary/20 overflow-hidden hover:-translate-y-1"
               onClick={() => router.push(feature.route)}
             >
@@ -118,7 +118,7 @@ export default function DashboardHome() {
       </motion.div>
 
       {/* Quick Stats Section */}
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2, duration: 0.5 }}
@@ -164,7 +164,7 @@ export default function DashboardHome() {
         </Card>
       </motion.div>
 
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3, duration: 0.5 }}
@@ -185,18 +185,18 @@ export default function DashboardHome() {
                     value={`${typeof window !== 'undefined' ? window.location.origin : ''}/u/${username}`}
                     className="w-full px-4 py-2 pr-12 rounded-md border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
                   />
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
+                  <Button
+                    variant="ghost"
+                    size="icon"
                     className="absolute right-0 top-0 h-full px-3 text-muted-foreground hover:text-foreground"
                     onClick={copyProfileLink}
                   >
                     <Copy className="h-4 w-4" />
                   </Button>
                 </div>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
+                <Button
+                  variant="outline"
+                  size="sm"
                   className="shrink-0"
                   onClick={copyProfileLink}
                 >
@@ -225,7 +225,7 @@ export default function DashboardHome() {
                   Share your unique link to receive anonymous messages
                 </p>
               </div>
-              <button 
+              <button
                 onClick={() => router.push('/dashboard/messages')}
                 className="px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm font-medium hover:bg-primary/90 transition-colors whitespace-nowrap"
               >

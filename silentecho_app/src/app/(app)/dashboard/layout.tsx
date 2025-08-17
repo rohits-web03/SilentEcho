@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils';
 import { useState, useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { Home, MessageSquare, FileText, Settings, User, Menu, ChevronLeft, Loader2 } from 'lucide-react';
-import { useSession } from 'next-auth/react';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function DashboardLayout({
   children,
@@ -16,7 +16,7 @@ export default function DashboardLayout({
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
-  const { data: session, status } = useSession();
+  const { user, loading, error } = useAuth();
 
   // Close sidebar when route changes on mobile
   useEffect(() => {
@@ -32,13 +32,16 @@ export default function DashboardLayout({
 
   // Handle authentication
   useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/login');
+    if (loading) {
+      return;
     }
-  }, [status, router]);
+    if (!user) {
+      router.push('/sign-in');
+    }
+  }, [user, loading, router]);
 
   // Show loading state while checking auth
-  if (status !== 'authenticated') {
+  if (loading) {
     return (
       <div className="flex h-screen w-full items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -60,7 +63,7 @@ export default function DashboardLayout({
       <Navbar />
       <div className="flex flex-1 pt-16">
         {/* Sidebar */}
-        <div 
+        <div
           className={cn(
             'fixed inset-y-0 left-0 z-40 transition-all duration-300 ease-in-out',
             'transform',
@@ -71,7 +74,7 @@ export default function DashboardLayout({
           )}
         >
           <Sidebar navigation={navigation} isCollapsed={!sidebarOpen} />
-          
+
           {/* Collapse button */}
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -84,9 +87,9 @@ export default function DashboardLayout({
             <span className="sr-only">Toggle sidebar</span>
           </button>
         </div>
-        
+
         {/* Main content */}
-        <main 
+        <main
           className={cn(
             'flex-1 transition-all duration-300',
             'w-full',
@@ -103,7 +106,7 @@ export default function DashboardLayout({
                 <Menu className="h-5 w-5" />
                 <span className="sr-only">Toggle sidebar</span>
               </button>
-              
+
               {children}
             </div>
           </div>

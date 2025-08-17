@@ -3,7 +3,6 @@
 import { MessageCard } from '@/components/MessageCard';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/components/ui/use-toast';
 import { Message } from '@/model/User';
@@ -11,9 +10,7 @@ import { ApiResponse } from '@/types/ApiResponse';
 import { zodResolver } from '@hookform/resolvers/zod';
 import axios, { AxiosError } from 'axios';
 import { Copy, Loader2, MailQuestion, RefreshCcw } from 'lucide-react';
-import { User } from 'next-auth';
-import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
+import { useAuth } from '@/hooks/useAuth';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { motion } from 'framer-motion';
@@ -30,7 +27,7 @@ function UserMessagesDashboard() {
         setMessages(messages.filter((message) => message._id !== messageId));
     };
 
-    const { data: session } = useSession();
+    const { user } = useAuth();
 
     const form = useForm({
         resolver: zodResolver(acceptMessageSchema),
@@ -42,7 +39,9 @@ function UserMessagesDashboard() {
     const fetchAcceptMessages = useCallback(async () => {
         setIsSwitchLoading(true);
         try {
-            const response = await axios.get<ApiResponse>('/api/accept-messages');
+            const response = await axios.patch<ApiResponse>(`${process.env.NEXT_PUBLIC_GOSERVER_BASE_URL}/api/user/${user?.id}/accept-messages`, {
+                acceptMessages: !acceptMessages,
+            });
             setValue('acceptMessages', response.data.isAcceptingMessages);
         } catch (error) {
             const axiosError = error as AxiosError<ApiResponse>;
@@ -89,17 +88,17 @@ function UserMessagesDashboard() {
 
     // Fetch initial state from the server
     useEffect(() => {
-        if (!session || !session.user) return;
+        if (!user) return;
 
         fetchMessages();
 
         fetchAcceptMessages();
-    }, [session, setValue, toast, fetchAcceptMessages, fetchMessages]);
+    }, [user, setValue, toast, fetchAcceptMessages, fetchMessages]);
 
     // Handle switch change
     const handleSwitchChange = async () => {
         try {
-            const response = await axios.post<ApiResponse>('/api/accept-messages', {
+            const response = await axios.patch<ApiResponse>(`${process.env.NEXT_PUBLIC_GOSERVER_BASE_URL}/api/user/${user?.id}/accept-messages`, {
                 acceptMessages: !acceptMessages,
             });
             setValue('acceptMessages', !acceptMessages);
@@ -119,11 +118,11 @@ function UserMessagesDashboard() {
         }
     };
 
-    if (!session || !session.user) {
+    if (!user) {
         return <div></div>;
     }
 
-    const { username } = session.user as User;
+    const { username } = user;
 
     const baseUrl = `${window.location.protocol}//${window.location.host}`;
     const profileUrl = `${baseUrl}/u/${username}`;

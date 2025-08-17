@@ -9,8 +9,7 @@ import axios, { AxiosError } from 'axios';
 import React, { useCallback, useEffect, useState } from 'react';
 import { Note } from '@/model/Note';
 import { ApiResponse, GoApiResponse } from '@/types/ApiResponse';
-import { useSession } from 'next-auth/react';
-import { User } from 'next-auth';
+import { useAuth } from '@/hooks/useAuth';
 import { NoteCard } from '@/components/NoteCard';
 import CreateNoteDialog from '@/components/CreateNoteDialog';
 import { motion } from 'framer-motion';
@@ -21,14 +20,14 @@ export default function CipherNotesDashboard() {
     const [showDialog, setShowDialog] = useState(false);
     const { toast } = useToast();
 
-    const { data: session } = useSession();
+    const { user } = useAuth();
 
     const fetchNotes = useCallback(async () => {
-        if (!session?.user?._id) return;
-        
+        if (!user) return;
+
         setIsLoading(true);
         try {
-            const response = await axios.get<GoApiResponse>(`${process.env.NEXT_PUBLIC_GOSERVER_BASE_URL}/api/notes/user/${session?.user._id}`);
+            const response = await axios.get<GoApiResponse>(`${process.env.NEXT_PUBLIC_GOSERVER_BASE_URL}/api/notes/user/${user.id}`);
             const { data: apiData } = response;
             setNotes(apiData.data || []);
         } catch (error) {
@@ -41,18 +40,18 @@ export default function CipherNotesDashboard() {
         } finally {
             setIsLoading(false);
         }
-    }, [toast, session?.user?._id]);
+    }, [toast, user?.id]);
 
     useEffect(() => {
-        if (!session || !session.user) return;
+        if (!user) return;
         fetchNotes();
-    }, [session, fetchNotes, session?.user?._id]);
+    }, [user, fetchNotes, user?.id]);
 
     const handleDeleteNote = (noteId: string) => {
         setNotes(notes.filter((note) => note._id !== noteId));
     };
 
-    if (!session || !session.user) {
+    if (!user) {
         return <div></div>;
     }
 
@@ -62,12 +61,12 @@ export default function CipherNotesDashboard() {
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight">Cipher Notes</h1>
                     <p className="text-muted-foreground">
-                        {notes.length > 0 
+                        {notes.length > 0
                             ? `You have ${notes.length} ${notes.length === 1 ? 'note' : 'notes'}`
                             : 'No notes yet'}
                     </p>
                 </div>
-                
+
                 <div className="flex items-center space-x-4">
                     <Button
                         variant="outline"
@@ -82,8 +81,8 @@ export default function CipherNotesDashboard() {
                         )}
                         Refresh
                     </Button>
-                    
-                    <Button 
+
+                    <Button
                         onClick={() => setShowDialog(true)}
                         size="sm"
                         className="bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white"
@@ -121,7 +120,7 @@ export default function CipherNotesDashboard() {
                             <p className="text-sm text-muted-foreground max-w-md mb-4">
                                 Create your first encrypted note to get started
                             </p>
-                            <Button 
+                            <Button
                                 onClick={() => setShowDialog(true)}
                                 className="mt-2"
                                 size="sm"
@@ -135,7 +134,7 @@ export default function CipherNotesDashboard() {
             </div>
 
             <CreateNoteDialog
-                userId={session.user._id}
+                userId={user.id}
                 open={showDialog}
                 onOpenChange={setShowDialog}
                 onNoteCreated={fetchNotes}
