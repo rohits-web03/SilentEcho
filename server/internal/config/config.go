@@ -1,0 +1,52 @@
+package config
+
+import (
+	"os"
+	"time"
+
+	"github.com/gin-contrib/cors"
+	"github.com/joho/godotenv"
+)
+
+type Config struct {
+	GINMode    string
+	DB_URL     string
+	Port       string
+	JWTSecret  string
+	CorsConfig cors.Config
+}
+
+var Envs = initConfig()
+
+func initConfig() Config {
+	godotenv.Load()
+
+	return Config{
+		GINMode:    getEnv("GIN_MODE", "debug"),
+		DB_URL:     getEnv("DB_URL", ""),
+		Port:       getEnv("PORT", "8080"),
+		JWTSecret:  getEnv("JWT_SECRET", "not-so-secret-now-is-it?"),
+		CorsConfig: CorsConfig(),
+	}
+}
+
+// Gets the env by key or fallbacks
+func getEnv(key, fallback string) string {
+	if value, ok := os.LookupEnv(key); ok {
+		return value
+	}
+
+	return fallback
+}
+
+func CorsConfig() cors.Config {
+	return cors.Config{
+		// AllowOrigins:     []string{"https://silentecho.vercel.app/"}, // frontend URL
+		AllowOrigins:     []string{"http://localhost:3000"}, // frontend URL
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
+	}
+}

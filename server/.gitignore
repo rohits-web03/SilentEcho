@@ -1,0 +1,47 @@
+# Binaries for programs
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Test results
+*.test
+*.out
+
+# Go module cache
+.cache/
+
+# Environment variables
+.env
+.env.*
+
+# Log files
+*.log
+
+# GORM specific files (if any are generated, though typically GORM doesn't generate files)
+# You might add specific migration files if they are generated into a separate directory
+# e.g., /migrations/*.sql if you have a migration tool that creates them
+
+# IDE specific files
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# Dependency directories
+vendor/
+
+# Build outputs
+build/
+dist/
+
+# Configuration files that might contain sensitive info
+config.toml
+config.yaml
+config.yml
+*.json # Be careful with this, only if it's not meant to be committed
+
+# Database specific files (if they are local development files like sqlite)
+*.db
+*.sqlite
+*.sqlite3
