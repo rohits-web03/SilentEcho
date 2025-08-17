@@ -25,7 +25,7 @@ func AuthMiddleware() gin.HandlerFunc {
 			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 				return nil, jwt.ErrSignatureInvalid
 			}
-			return jwtSecret, nil
+			return []byte(jwtSecret), nil
 		})
 
 		if err != nil || !token.Valid {
@@ -35,8 +35,7 @@ func AuthMiddleware() gin.HandlerFunc {
 
 		// extract claims
 		if claims, ok := token.Claims.(jwt.MapClaims); ok {
-			userID, _ := claims["user_id"].(string)
-			// add user info to context
+			userID, _ := claims["userId"].(string)
 			c.Set("userID", userID)
 		} else {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
