@@ -20,6 +20,7 @@ func SetupRouter() *gin.Engine {
 		apiRouter.POST("/auth/sign-up", handlers.RegisterUser)
 		apiRouter.POST("/auth/login", handlers.LoginUser)
 		apiRouter.POST("/auth/verify-code", handlers.VerifyUserCode)
+		apiRouter.POST("/auth/logout", handlers.Logout)
 
 		// Notes
 		{

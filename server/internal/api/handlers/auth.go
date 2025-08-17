@@ -266,3 +266,24 @@ func LoginUser(c *gin.Context) {
 		"message": "Login successful",
 	})
 }
+
+// POST /api/auth/logout
+func Logout(c *gin.Context) {
+	isProd := config.Envs.GINMode == "release"
+
+	// Delete the token cookie
+	c.SetCookie(
+		"token",
+		"", // empty value
+		-1, // maxAge < 0 deletes the cookie
+		"/",
+		"",     // domain
+		isProd, // Secure only in production
+		true,   // HttpOnly
+	)
+
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"message": "Logged out successfully",
+	})
+}
