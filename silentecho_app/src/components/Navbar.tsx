@@ -6,7 +6,8 @@ import { User } from 'next-auth';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { Menu, X, User as UserIcon, MessageSquare } from 'lucide-react';
+import { Menu, X, User as UserIcon, MessageSquare, Sun, Moon } from 'lucide-react';
+import { useTheme } from 'next-themes';
 import { motion } from 'framer-motion';
 
 type NavbarProps = {
@@ -45,6 +46,7 @@ export function Navbar({ onMenuToggle }: NavbarProps) {
   };
 
   const user: User | undefined = session?.user;
+  const { theme, setTheme } = useTheme();
 
   const navLinks = [
     { name: 'Home', href: '/' },
@@ -76,7 +78,18 @@ export function Navbar({ onMenuToggle }: NavbarProps) {
               </Link>
             </div>
             
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                className="p-2 rounded-md text-muted-foreground hover:text-foreground focus:outline-none"
+                aria-label="Toggle theme"
+              >
+                {theme === 'dark' ? (
+                  <Sun className="h-5 w-5" />
+                ) : (
+                  <Moon className="h-5 w-5" />
+                )}
+              </button>
               {user && (
                 <div className="hidden md:flex items-center space-x-2 text-sm text-muted-foreground">
                   <span>Welcome, {user.username || user.email?.split('@')[0]}</span>
@@ -135,7 +148,18 @@ export function Navbar({ onMenuToggle }: NavbarProps) {
           </nav>
 
           {/* User Actions */}
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+              className="p-2 rounded-md text-muted-foreground hover:text-foreground focus:outline-none md:hidden"
+              aria-label="Toggle theme"
+            >
+              {theme === 'dark' ? (
+                <Sun className="h-5 w-5" />
+              ) : (
+                <Moon className="h-5 w-5" />
+              )}
+            </button>
             {user ? (
               <div className="flex items-center space-x-4">
                 <Link href="/dashboard">
@@ -155,6 +179,17 @@ export function Navbar({ onMenuToggle }: NavbarProps) {
               </div>
             ) : (
               <div className="hidden md:flex items-center space-x-2">
+                <button
+                  onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                  className="p-2 rounded-md text-muted-foreground hover:text-foreground focus:outline-none"
+                  aria-label="Toggle theme"
+                >
+                  {theme === 'dark' ? (
+                    <Sun className="h-5 w-5" />
+                  ) : (
+                    <Moon className="h-5 w-5" />
+                  )}
+                </button>
                 <Link href="/sign-in">
                   <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
                     Sign In
@@ -199,6 +234,59 @@ export function Navbar({ onMenuToggle }: NavbarProps) {
               {link.name}
             </Link>
           ))}
+          <div className="flex items-center justify-between py-2 px-1">
+            <span className="text-sm text-muted-foreground">Theme</span>
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={() => {
+                  setTheme('light');
+                }}
+                className={`p-2 rounded-md ${
+                  theme === 'light' ? 'bg-accent text-accent-foreground' : 'text-muted-foreground hover:text-foreground'
+                }`}
+                aria-label="Light theme"
+              >
+                <Sun className="h-4 w-4" />
+              </button>
+              <button
+                onClick={() => {
+                  setTheme('dark');
+                }}
+                className={`p-2 rounded-md ${
+                  theme === 'dark' ? 'bg-accent text-accent-foreground' : 'text-muted-foreground hover:text-foreground'
+                }`}
+                aria-label="Dark theme"
+              >
+                <Moon className="h-4 w-4" />
+              </button>
+              <button
+                onClick={() => {
+                  setTheme('system');
+                }}
+                className={`p-2 rounded-md ${
+                  theme === 'system' ? 'bg-accent text-accent-foreground' : 'text-muted-foreground hover:text-foreground'
+                }`}
+                aria-label="System theme"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="h-4 w-4"
+                >
+                  <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
+                  <line x1="8" y1="21" x2="16" y2="21" />
+                  <line x1="12" y1="17" x2="12" y2="21" />
+                </svg>
+              </button>
+            </div>
+          </div>
           {user ? (
             <>
               <Link
