@@ -27,13 +27,18 @@ export default function VerifyAccount() {
   const form = useForm<z.infer<typeof verifySchema>>({
     resolver: zodResolver(verifySchema),
   });
-
   const onSubmit = async (data: z.infer<typeof verifySchema>) => {
     try {
-      const response = await axios.post<ApiResponse>(`/api/verify-code`, {
-        username: params.username,
-        code: data.code,
-      });
+      const response = await axios.post<ApiResponse>(
+        `${process.env.NEXT_PUBLIC_GOSERVER_BASE_URL}/api/auth/verify-code`,
+        {
+          username: params.username,
+          code: data.code,
+        },
+        {
+          withCredentials: true,
+        }
+      );
 
       toast({
         title: 'Success',
@@ -58,7 +63,7 @@ export default function VerifyAccount() {
       <div className="container relative flex flex-col items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
         <div className="w-full max-w-md space-y-8 rounded-2xl bg-card p-8 shadow-lg backdrop-blur-sm">
           <div className="text-center">
-            <motion.h1 
+            <motion.h1
               className="text-3xl font-bold tracking-tight sm:text-4xl bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent"
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -66,7 +71,7 @@ export default function VerifyAccount() {
             >
               Verify Your Account
             </motion.h1>
-            <motion.p 
+            <motion.p
               className="mt-3 text-muted-foreground"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -88,8 +93,8 @@ export default function VerifyAccount() {
                   </FormItem>
                 )}
               />
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 transition-all transform hover:-translate-y-0.5 hover:shadow-lg"
               >
                 <span className="flex items-center justify-center">

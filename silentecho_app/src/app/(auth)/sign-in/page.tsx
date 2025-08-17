@@ -19,6 +19,7 @@ import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { signInSchema } from '@/schemas/signInSchema';
+import axios from 'axios';
 
 export default function SignInForm() {
   const router = useRouter();
@@ -26,37 +27,54 @@ export default function SignInForm() {
   const form = useForm<z.infer<typeof signInSchema>>({
     resolver: zodResolver(signInSchema),
     defaultValues: {
-      identifier: '',
+      username: '',
       password: '',
     },
   });
 
   const { toast } = useToast();
-  const onSubmit = async (data: z.infer<typeof signInSchema>) => {
-    const result = await signIn('credentials', {
-      redirect: false,
-      identifier: data.identifier,
-      password: data.password,
-    });
 
-    if (result?.error) {
-      if (result.error === 'CredentialsSignin') {
+  const onSubmit = async (data: z.infer<typeof signInSchema>) => {
+    try {
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_GOSERVER_BASE_URL}/api/auth/login`,
+        {
+          username: data.username,
+          password: data.password,
+        },
+        {
+          withCredentials: true, // To allow cookies to be set
+        }
+      );
+
+      if (response.data.success) {
         toast({
-          title: 'Login Failed',
-          description: 'Incorrect username or password',
-          variant: 'destructive',
+          title: "Login successful",
+          description: "Redirecting...",
+        });
+
+        router.replace("/dashboard");
+      } else {
+        toast({
+          title: "Login failed",
+          description: response.data.message || "Unknown error",
+          variant: "destructive",
+        });
+      }
+    } catch (error: any) {
+      if (error.response) {
+        toast({
+          title: "Login failed",
+          description: error.response.data?.message || "Invalid username or password",
+          variant: "destructive",
         });
       } else {
         toast({
-          title: 'Error',
-          description: result.error,
-          variant: 'destructive',
+          title: "Network error",
+          description: "Please try again later",
+          variant: "destructive",
         });
       }
-    }
-
-    if (result?.url) {
-      router.replace('/dashboard');
     }
   };
 
@@ -65,7 +83,7 @@ export default function SignInForm() {
       <div className="container relative flex flex-col items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
         <div className="w-full max-w-md space-y-8 rounded-2xl bg-card p-8 shadow-lg backdrop-blur-sm">
           <div className="text-center">
-            <motion.h1 
+            <motion.h1
               className="text-3xl font-bold tracking-tight sm:text-4xl bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent"
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -73,7 +91,7 @@ export default function SignInForm() {
             >
               Welcome Back to SilentEcho
             </motion.h1>
-            <motion.p 
+            <motion.p
               className="mt-3 text-muted-foreground"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -82,40 +100,40 @@ export default function SignInForm() {
               Sign in to continue your secret conversations
             </motion.p>
           </div>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <FormField
-              name="identifier"
-              control={form.control}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Email/Username</FormLabel>
-                  <Input {...field} />
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              name="password"
-              control={form.control}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Password</FormLabel>
-                  <Input type="password" {...field} />
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <Button 
-              type="submit" 
-              className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 transition-all transform hover:-translate-y-0.5 hover:shadow-lg"
-            >
-              <span className="flex items-center justify-center">
-                Sign In <ArrowRight className="ml-2 h-4 w-4" />
-              </span>
-            </Button>
-          </form>
-        </Form>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              <FormField
+                name="username"
+                control={form.control}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Username</FormLabel>
+                    <Input {...field} />
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                name="password"
+                control={form.control}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Password</FormLabel>
+                    <Input type="password" {...field} />
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <Button
+                type="submit"
+                className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 transition-all transform hover:-translate-y-0.5 hover:shadow-lg"
+              >
+                <span className="flex items-center justify-center">
+                  Sign In <ArrowRight className="ml-2 h-4 w-4" />
+                </span>
+              </Button>
+            </form>
+          </Form>
           <div className="relative mt-6">
             <div className="absolute inset-0 flex items-center">
               <span className="w-full border-t border-border" />
@@ -126,9 +144,9 @@ export default function SignInForm() {
               </span>
             </div>
           </div>
-          <Button 
-            asChild 
-            variant="outline" 
+          <Button
+            asChild
+            variant="outline"
             className="w-full mt-4 hover:bg-accent/50 transition-colors"
           >
             <Link href="/sign-up">
