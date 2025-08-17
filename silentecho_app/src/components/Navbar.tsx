@@ -1,25 +1,26 @@
 'use client';
 
-import { useSession, signOut } from 'next-auth/react';
+import { logout } from '@/utils/auth';
+import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { User } from 'next-auth';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Menu, X, User as UserIcon, MessageSquare, Sun, Moon } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { motion } from 'framer-motion';
-
 type NavbarProps = {
   onMenuToggle?: () => void;
 };
 
 export function Navbar({ onMenuToggle }: NavbarProps) {
-  const { data: session } = useSession();
+  const { user } = useAuth();
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname();
   const isDashboard = pathname.startsWith('/dashboard');
+  const router = useRouter();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -31,7 +32,7 @@ export function Navbar({ onMenuToggle }: NavbarProps) {
     } else {
       setScrolled(true);
     }
-    
+
     return () => window.removeEventListener('scroll', handleScroll);
   }, [isDashboard]);
 
@@ -40,12 +41,18 @@ export function Navbar({ onMenuToggle }: NavbarProps) {
     setMobileMenuOpen(false);
   }, [pathname]);
 
+  const handleLogout = async () => {
+    const { status } = await logout();
+    if (status) {
+      router.replace('/');
+    }
+  };
+
   const toggleMobileMenu = () => {
     setMobileMenuOpen(!mobileMenuOpen);
     if (onMenuToggle) onMenuToggle();
   };
 
-  const user: User | undefined = session?.user;
   const { theme, setTheme } = useTheme();
 
   const navLinks = [
@@ -77,7 +84,7 @@ export function Navbar({ onMenuToggle }: NavbarProps) {
                 </span>
               </Link>
             </div>
-            
+
             <div className="flex items-center space-x-2">
               <button
                 onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
@@ -98,7 +105,7 @@ export function Navbar({ onMenuToggle }: NavbarProps) {
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => signOut({ callbackUrl: '/' })}
+                onClick={handleLogout}
                 className="text-muted-foreground hover:text-foreground"
               >
                 Sign Out
@@ -112,17 +119,16 @@ export function Navbar({ onMenuToggle }: NavbarProps) {
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled 
-          ? 'bg-background/80 backdrop-blur-md border-b border-border/30 shadow-sm' 
-          : 'bg-transparent border-b border-transparent'
-      }`}
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled
+        ? 'bg-background/80 backdrop-blur-md border-b border-border/30 shadow-sm'
+        : 'bg-transparent border-b border-transparent'
+        }`}
     >
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-2">
-            <motion.div 
+            <motion.div
               className="flex items-center justify-center h-10 w-10 rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
@@ -171,7 +177,7 @@ export function Navbar({ onMenuToggle }: NavbarProps) {
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => signOut({ callbackUrl: '/' })}
+                  onClick={handleLogout}
                   className="text-muted-foreground hover:text-foreground"
                 >
                   Sign Out
@@ -219,9 +225,8 @@ export function Navbar({ onMenuToggle }: NavbarProps) {
 
       {/* Mobile menu */}
       <div
-        className={`md:hidden transition-all duration-300 ease-in-out overflow-hidden ${
-          mobileMenuOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
-        }`}
+        className={`md:hidden transition-all duration-300 ease-in-out overflow-hidden ${mobileMenuOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+          }`}
       >
         <div className="px-4 py-4 space-y-4 border-t border-border bg-background/95 backdrop-blur">
           {navLinks.map((link) => (
@@ -241,9 +246,8 @@ export function Navbar({ onMenuToggle }: NavbarProps) {
                 onClick={() => {
                   setTheme('light');
                 }}
-                className={`p-2 rounded-md ${
-                  theme === 'light' ? 'bg-accent text-accent-foreground' : 'text-muted-foreground hover:text-foreground'
-                }`}
+                className={`p-2 rounded-md ${theme === 'light' ? 'bg-accent text-accent-foreground' : 'text-muted-foreground hover:text-foreground'
+                  }`}
                 aria-label="Light theme"
               >
                 <Sun className="h-4 w-4" />
@@ -252,9 +256,8 @@ export function Navbar({ onMenuToggle }: NavbarProps) {
                 onClick={() => {
                   setTheme('dark');
                 }}
-                className={`p-2 rounded-md ${
-                  theme === 'dark' ? 'bg-accent text-accent-foreground' : 'text-muted-foreground hover:text-foreground'
-                }`}
+                className={`p-2 rounded-md ${theme === 'dark' ? 'bg-accent text-accent-foreground' : 'text-muted-foreground hover:text-foreground'
+                  }`}
                 aria-label="Dark theme"
               >
                 <Moon className="h-4 w-4" />
@@ -263,9 +266,8 @@ export function Navbar({ onMenuToggle }: NavbarProps) {
                 onClick={() => {
                   setTheme('system');
                 }}
-                className={`p-2 rounded-md ${
-                  theme === 'system' ? 'bg-accent text-accent-foreground' : 'text-muted-foreground hover:text-foreground'
-                }`}
+                className={`p-2 rounded-md ${theme === 'system' ? 'bg-accent text-accent-foreground' : 'text-muted-foreground hover:text-foreground'
+                  }`}
                 aria-label="System theme"
               >
                 <svg
@@ -298,7 +300,7 @@ export function Navbar({ onMenuToggle }: NavbarProps) {
               </Link>
               <button
                 onClick={() => {
-                  signOut({ callbackUrl: '/' });
+                  handleLogout();
                   setMobileMenuOpen(false);
                 }}
                 className="w-full text-left py-2 text-muted-foreground hover:text-foreground transition-colors"

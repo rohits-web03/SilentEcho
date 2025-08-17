@@ -5,7 +5,7 @@ import { Home, Mail, FileText, LogOut } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { Button } from './ui/button';
-import { signOut } from 'next-auth/react';
+import { logout } from '@/utils/auth';
 
 type SidebarProps = {
   isOpen: boolean;
@@ -22,11 +22,6 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
 
-  const handleSignOut = async () => {
-    await signOut({ redirect: false });
-    router.push('/');
-  };
-
   return (
     <>
       {/* Overlay */}
@@ -37,7 +32,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
           aria-hidden="true"
         />
       )}
-      
+
       <aside
         className={cn(
           'fixed left-0 top-0 h-full w-64 bg-card border-r border-border z-40 transition-transform duration-300 ease-in-out',
@@ -50,7 +45,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
             SilentEcho
           </h2>
         </div>
-        
+
         <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
           {navItems.map((item) => {
             const isActive = pathname === item.href;
@@ -78,12 +73,17 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
             );
           })}
         </nav>
-        
+
         <div className="p-4 border-t border-border">
           <Button
             variant="ghost"
             className="w-full justify-start text-muted-foreground hover:text-foreground"
-            onClick={handleSignOut}
+            onClick={async () => {
+              const { status } = await logout();
+              if (status) {
+                router.replace('/');
+              }
+            }}
           >
             <LogOut className="h-5 w-5 mr-2" />
             Sign Out
