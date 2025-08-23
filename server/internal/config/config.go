@@ -10,11 +10,13 @@ import (
 )
 
 type Config struct {
-	GINMode    string
-	DB_URL     string
-	Port       string
-	JWTSecret  string
-	CorsConfig cors.Config
+	GINMode     string
+	DB_URL      string
+	MQ_URL      string
+	Port        string
+	JWTSecret   string
+	CorsConfig  cors.Config
+	EMAIL_QUEUE string
 }
 
 var Envs = initConfig()
@@ -30,11 +32,13 @@ func initConfig() Config {
 	}
 
 	return Config{
-		GINMode:    getEnv("GIN_MODE", "debug"),
-		DB_URL:     getEnv("DB_URL", ""),
-		Port:       getEnv("PORT", "8080"),
-		JWTSecret:  getEnv("JWT_SECRET", "not-so-secret-now-is-it?"),
-		CorsConfig: CorsConfig(),
+		GINMode:     getEnv("GIN_MODE", "debug"),
+		DB_URL:      getEnv("DB_URL", ""),
+		MQ_URL:      getEnv("MQ_URL", "amqp://guest:guest@localhost:5672/"),
+		Port:        getEnv("PORT", "8080"),
+		JWTSecret:   getEnv("JWT_SECRET", "not-so-secret-now-is-it?"),
+		CorsConfig:  CorsConfig(),
+		EMAIL_QUEUE: getEnv("EMAIL_QUEUE", "email_queue"),
 	}
 }
 
