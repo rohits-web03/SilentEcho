@@ -8,19 +8,25 @@ import (
 	"github.com/rohits-web03/SilentEcho/server/internal/api/handlers"
 	"github.com/rohits-web03/SilentEcho/server/internal/api/middleware"
 	"github.com/rohits-web03/SilentEcho/server/internal/config"
+	"github.com/rohits-web03/SilentEcho/server/internal/queue"
 )
 
-func SetupRouter() *gin.Engine {
+func SetupRouter(rmq *queue.RabbitMQ) *gin.Engine {
 	router := gin.Default()
 	router.Use(cors.New(config.Envs.CorsConfig))
 	// Routes
 	{
 		apiRouter := router.Group("/api")
 		// Auth
-		apiRouter.POST("/auth/sign-up", handlers.RegisterUser)
-		apiRouter.POST("/auth/login", handlers.LoginUser)
-		apiRouter.POST("/auth/verify-code", handlers.VerifyUserCode)
-		apiRouter.POST("/auth/logout", handlers.Logout)
+		{
+			authRouter := apiRouter.Group("/auth")
+			authHandler := handlers.NewAuthHandler(rmq)
+			authRouter.POST("/sign-up", authHandler.RegisterUser)
+			authRouter.POST("/login", authHandler.LoginUser)
+			authRouter.POST("/verify-code", authHandler.VerifyUserCode)
+			authRouter.Use(middleware.AuthMiddleware())
+			authRouter.POST("/logout", authHandler.Logout)
+		}
 
 		// Notes
 		{

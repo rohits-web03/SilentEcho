@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -15,14 +16,23 @@ import (
 	"github.com/google/uuid"
 	"github.com/rohits-web03/SilentEcho/server/internal/config"
 	"github.com/rohits-web03/SilentEcho/server/internal/models"
+	"github.com/rohits-web03/SilentEcho/server/internal/queue"
 	"github.com/rohits-web03/SilentEcho/server/internal/repositories"
-	"github.com/rohits-web03/SilentEcho/server/internal/utils"
+	"github.com/rohits-web03/SilentEcho/server/internal/worker"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
 
+type AuthHandler struct {
+	rmq *queue.RabbitMQ
+}
+
+func NewAuthHandler(rmq *queue.RabbitMQ) *AuthHandler {
+	return &AuthHandler{rmq: rmq}
+}
+
 // POST /auth/sign-up
-func RegisterUser(c *gin.Context) {
+func (h *AuthHandler) RegisterUser(c *gin.Context) {
 	var input struct {
 		Username string `json:"username"`
 		Email    string `json:"email"`
@@ -85,9 +95,21 @@ func RegisterUser(c *gin.Context) {
 		}
 	}
 
-	// Send verification email
-	if err := utils.SendVerificationEmail(input.Email, input.Username, verifyCode); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "message": "Failed to send verification email"})
+	job := worker.EmailJob{
+		To:        input.Email,
+		Subject:   "Verify your account",
+		PlainBody: fmt.Sprintf("Hello %s, please verify your account using code: %s", input.Username, verifyCode),
+		HTMLBody:  fmt.Sprintf("<p>Hello %s,</p><p>Please verify your account using code: <b>%s</b></p>", input.Username, verifyCode),
+	}
+
+	body, err := json.Marshal(job)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "message": "Failed to encode email job"})
+		return
+	}
+
+	if err := h.rmq.Publish(config.Envs.EMAIL_QUEUE, body); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "message": "Failed to enqueue email job"})
 		return
 	}
 
@@ -110,7 +132,7 @@ func generateVerifyCode() (string, error) {
 	return fmt.Sprintf("%06d", code), nil
 }
 
-func VerifyUserCode(c *gin.Context) {
+func (h *AuthHandler) VerifyUserCode(c *gin.Context) {
 	var input struct {
 		Username string `json:"username"`
 		Code     string `json:"code"`
@@ -173,7 +195,7 @@ type Claims struct {
 	jwt.RegisteredClaims
 }
 
-func LoginUser(c *gin.Context) {
+func (h *AuthHandler) LoginUser(c *gin.Context) {
 	log.Println("LoginUser called")
 
 	var input struct {
@@ -268,7 +290,7 @@ func LoginUser(c *gin.Context) {
 }
 
 // POST /api/auth/logout
-func Logout(c *gin.Context) {
+func (h *AuthHandler) Logout(c *gin.Context) {
 	isProd := config.Envs.GINMode == "release"
 
 	// Delete the token cookie
