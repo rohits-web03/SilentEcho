@@ -62,6 +62,12 @@ func CheckUsername(c *gin.Context) {
 // PATCH /api/user/:id/accept-messages
 func AcceptMessages(c *gin.Context) {
 	userID := c.Param("id")
+
+	if userID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": "User ID is required"})
+		return
+	}
+
 	uid, err := uuid.Parse(userID)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": "Invalid user ID"})
@@ -71,6 +77,7 @@ func AcceptMessages(c *gin.Context) {
 	var input struct {
 		IsAcceptingMessages bool `json:"isAcceptingMessages"`
 	}
+
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": "Invalid input"})
 		return
@@ -94,4 +101,28 @@ func AcceptMessages(c *gin.Context) {
 		"message":             "User preference updated",
 		"isAcceptingMessages": input.IsAcceptingMessages,
 	})
+}
+
+// GET /api/user/:id/accept-messages
+func GetAcceptMessagesStatus(c *gin.Context) {
+	userID := c.Param("id")
+
+	if userID == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": "User ID is required"})
+		return
+	}
+
+	uid, err := uuid.Parse(userID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": "Invalid user ID"})
+		return
+	}
+
+	var user models.User
+	if err := repositories.DB.Where("id = ?", uid).First(&user).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "message": "Failed to fetch user"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"success": true, "isAcceptingMessages": user.IsAcceptingMessages})
 }
