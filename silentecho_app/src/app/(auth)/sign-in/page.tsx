@@ -19,7 +19,7 @@ import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { signInSchema } from '@/schemas/signInSchema';
-import axios from 'axios';
+import { goapi } from '@/lib/utils';
 
 export default function SignInForm() {
   const router = useRouter();
@@ -36,14 +36,11 @@ export default function SignInForm() {
 
   const onSubmit = async (data: z.infer<typeof signInSchema>) => {
     try {
-      const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_GOSERVER_BASE_URL}/api/auth/login`,
+      const response = await goapi.post(
+        `/api/auth/login`,
         {
           username: data.username,
           password: data.password,
-        },
-        {
-          withCredentials: true, // To allow cookies to be set
         }
       );
 

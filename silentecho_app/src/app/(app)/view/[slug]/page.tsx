@@ -2,10 +2,11 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'next/navigation';
-import axios from 'axios';
+import { AxiosError } from 'axios';
 
 import { decryptNote } from '@/lib/utils';
 import { NoteData } from '@/types/ApiResponse';
+import { goapi } from '@/lib/utils';
 
 export default function Page() {
     const params = useParams();
@@ -43,7 +44,7 @@ export default function Page() {
             try {
                 const apiUrl = `${process.env.NEXT_PUBLIC_GOSERVER_BASE_URL}/api/note/${slug}`;
 
-                const response = await axios.get<NoteData>(apiUrl);
+                const response = await goapi.get<NoteData>(apiUrl);
 
                 if (response.data && response.data.ciphernote) {
                     setNoteCiphertext(response.data.ciphernote);
@@ -53,7 +54,7 @@ export default function Page() {
                 }
             } catch (err: any) {
                 console.error("Fetch error:", err);
-                if (axios.isAxiosError(err)) {
+                if (err instanceof AxiosError) {
                     if (err.response?.status === 404) {
                         setError(`Note with slug "${slug}" not found.`);
                     } else {

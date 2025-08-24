@@ -1,13 +1,11 @@
-import axios, { AxiosError } from "axios";
+import { goapi } from "@/lib/utils";
+import { AxiosError } from "axios";
 
 export async function logout() {
     try {
-        const res = await axios.post(
+        const res = await goapi.post(
             `${process.env.NEXT_PUBLIC_GOSERVER_BASE_URL}/api/auth/logout`,
-            {},
-            {
-                withCredentials: true,
-            }
+            {}
         );
         return { status: res.data.success };
     } catch (error: unknown) {

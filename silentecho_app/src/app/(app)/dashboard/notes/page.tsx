@@ -5,14 +5,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/components/ui/use-toast';
 import { FileText, Loader2, PlusCircle, RefreshCcw } from 'lucide-react';
-import axios, { AxiosError } from 'axios';
+import { AxiosError } from 'axios';
 import React, { useCallback, useEffect, useState } from 'react';
 import { Note } from '@/model/Note';
-import { ApiResponse, GoApiResponse } from '@/types/ApiResponse';
+import { GoApiResponse } from '@/types/ApiResponse';
 import { useAuth } from '@/hooks/useAuth';
 import { NoteCard } from '@/components/NoteCard';
 import CreateNoteDialog from '@/components/CreateNoteDialog';
 import { motion } from 'framer-motion';
+import { goapi } from '@/lib/utils';
 
 export default function CipherNotesDashboard() {
     const [notes, setNotes] = useState<Note[]>([]);
@@ -27,7 +28,7 @@ export default function CipherNotesDashboard() {
 
         setIsLoading(true);
         try {
-            const response = await axios.get<GoApiResponse>(`${process.env.NEXT_PUBLIC_GOSERVER_BASE_URL}/api/notes/user/${user.id}`);
+            const response = await goapi.get<GoApiResponse>(`/api/notes/user/${user.id}`);
             const { data: apiData } = response;
             setNotes(apiData.data || []);
         } catch (error) {

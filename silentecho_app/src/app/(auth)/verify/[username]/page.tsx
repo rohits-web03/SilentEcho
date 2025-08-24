@@ -12,13 +12,14 @@ import { Input } from '@/components/ui/input';
 import { useToast } from '@/components/ui/use-toast';
 import { ApiResponse } from '@/types/ApiResponse';
 import { zodResolver } from '@hookform/resolvers/zod';
-import axios, { AxiosError } from 'axios';
+import { AxiosError } from 'axios';
 import { useParams, useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { verifySchema } from '@/schemas/verifySchema';
 import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
+import { goapi } from '@/lib/utils';
 
 export default function VerifyAccount() {
   const router = useRouter();
@@ -29,14 +30,11 @@ export default function VerifyAccount() {
   });
   const onSubmit = async (data: z.infer<typeof verifySchema>) => {
     try {
-      const response = await axios.post<ApiResponse>(
-        `${process.env.NEXT_PUBLIC_GOSERVER_BASE_URL}/api/auth/verify-code`,
+      const response = await goapi.post<ApiResponse>(
+        `/api/auth/verify-code`,
         {
           username: params.username,
           code: data.code,
-        },
-        {
-          withCredentials: true,
         }
       );
 

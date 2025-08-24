@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import axios from 'axios';
 import { AuthState, User } from '@/types';
+import { goapi } from '@/lib/utils';
 
 export function useAuth() {
     const [auth, setAuth] = useState<AuthState>({
@@ -14,9 +14,7 @@ export function useAuth() {
     useEffect(() => {
         const fetchUser = async () => {
             try {
-                const res = await axios.get<User>(`${process.env.NEXT_PUBLIC_GOSERVER_BASE_URL}/api/user/info`, {
-                    withCredentials: true, // ensures cookie is sent
-                });
+                const res = await goapi.get<User>(`/api/user/info`);
                 setAuth({ user: res.data, loading: false, error: null });
             } catch (err: any) {
                 console.error('Failed to fetch user info:', err);

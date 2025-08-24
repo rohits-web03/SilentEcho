@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import axios, { AxiosError } from 'axios';
+import { AxiosError } from 'axios';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { Loader2 } from 'lucide-react';
@@ -24,6 +24,7 @@ import { ApiResponse } from '@/types/ApiResponse';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { messageSchema } from '@/schemas/messageSchema';
+import { goapi } from '@/lib/utils';
 
 const specialChar = '||';
 
@@ -63,7 +64,7 @@ export default function SendMessage() {
   const onSubmit = async (data: z.infer<typeof messageSchema>) => {
     setIsLoading(true);
     try {
-      const response = await axios.post<ApiResponse>('/api/send-message', {
+      const response = await goapi.post<ApiResponse>(`/api/messages/`, {
         ...data,
         username,
       });
@@ -135,7 +136,7 @@ export default function SendMessage() {
 
                 <div className="pt-2">
                   {isLoading ? (
-                    <Button 
+                    <Button
                       className="w-full py-6 text-base font-medium transition-all"
                       disabled
                     >
@@ -143,8 +144,8 @@ export default function SendMessage() {
                       Sending your message...
                     </Button>
                   ) : (
-                    <Button 
-                      type="submit" 
+                    <Button
+                      type="submit"
                       disabled={isLoading || !messageContent}
                       className="w-full py-6 text-base font-medium transition-all hover:shadow-lg hover:-translate-y-0.5"
                       size="lg"
@@ -174,8 +175,8 @@ export default function SendMessage() {
                 Create your account and start receiving anonymous messages
               </p>
               <Link href="/sign-up">
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   className="w-full border-primary/30 text-foreground/90 hover:bg-primary/5 hover:border-primary/50 transition-colors"
                   size="lg"
                 >

@@ -7,9 +7,9 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
-import axios from 'axios';
 import { encryptNote } from '@/lib/utils';
 import { Loader } from 'lucide-react';
+import { goapi } from '@/lib/utils';
 
 const expirationOptions = [
     { label: 'Never', value: '' },
@@ -60,7 +60,7 @@ export default function CreateNoteDialog({ userId, open, onOpenChange, onNoteCre
                 payload.expiresAt = expiresAt.toISOString();
             }
 
-            await axios.post(`${process.env.NEXT_PUBLIC_GOSERVER_BASE_URL}/api/note`, payload);
+            await goapi.post(`/api/note`, payload);
 
             toast({ title: 'Note Created', description: 'Encrypted note saved successfully.' });
 

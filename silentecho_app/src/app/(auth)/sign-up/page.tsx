@@ -18,11 +18,12 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/components/ui/use-toast';
-import axios, { AxiosError } from 'axios';
+import { AxiosError } from 'axios';
 import { ArrowRight, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { signUpSchema } from '@/schemas/signUpSchema';
+import { goapi } from '@/lib/utils';
 
 export default function SignUpForm() {
   const [username, setUsername] = useState('');
@@ -49,11 +50,10 @@ export default function SignUpForm() {
         setIsCheckingUsername(true);
         setUsernameMessage(''); // Reset message
         try {
-          const response = await axios.get(
-            `${process.env.NEXT_PUBLIC_GOSERVER_BASE_URL}/api/user/check-username`,
+          const response = await goapi.get(
+            `/api/user/check-username`,
             {
               params: { username: debouncedUsername },
-              withCredentials: true, // include cookies if backend sets any
             }
           );
 
@@ -78,12 +78,9 @@ export default function SignUpForm() {
   const onSubmit = async (data: z.infer<typeof signUpSchema>) => {
     setIsSubmitting(true);
     try {
-      const response = await axios.post<ApiResponse>(
-        `${process.env.NEXT_PUBLIC_GOSERVER_BASE_URL}/api/auth/sign-up`,
-        data,
-        {
-          withCredentials: true, // allows cookies to be set if backend does it later
-        }
+      const response = await goapi.post<ApiResponse>(
+        `/api/auth/sign-up`,
+        data
       );
 
       toast({

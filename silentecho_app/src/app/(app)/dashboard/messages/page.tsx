@@ -8,13 +8,14 @@ import { useToast } from '@/components/ui/use-toast';
 import { Message } from '@/model/User';
 import { ApiResponse } from '@/types/ApiResponse';
 import { zodResolver } from '@hookform/resolvers/zod';
-import axios, { AxiosError } from 'axios';
+import { AxiosError } from 'axios';
 import { Copy, Loader2, MailQuestion, RefreshCcw } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { motion } from 'framer-motion';
 import { acceptMessageSchema } from '@/schemas/acceptMessageSchema';
+import { goapi } from '@/lib/utils';
 
 function UserMessagesDashboard() {
     const [messages, setMessages] = useState<Message[]>([]);
@@ -24,7 +25,7 @@ function UserMessagesDashboard() {
     const { toast } = useToast();
 
     const handleDeleteMessage = (messageId: string) => {
-        setMessages(messages.filter((message) => message._id !== messageId));
+        setMessages(messages.filter((message) => message.id !== messageId));
     };
 
     const { user } = useAuth();
@@ -39,9 +40,7 @@ function UserMessagesDashboard() {
     const fetchAcceptMessages = useCallback(async () => {
         setIsSwitchLoading(true);
         try {
-            const response = await axios.patch<ApiResponse>(`${process.env.NEXT_PUBLIC_GOSERVER_BASE_URL}/api/user/${user?.id}/accept-messages`, {
-                acceptMessages: !acceptMessages,
-            });
+            const response = await goapi.get<ApiResponse>(`/api/user/${user?.id}/accept-messages`);
             setValue('acceptMessages', response.data.isAcceptingMessages);
         } catch (error) {
             const axiosError = error as AxiosError<ApiResponse>;
@@ -55,14 +54,14 @@ function UserMessagesDashboard() {
         } finally {
             setIsSwitchLoading(false);
         }
-    }, [setValue, toast]);
+    }, [user?.id]);
 
     const fetchMessages = useCallback(
         async (refresh: boolean = false) => {
             setIsLoading(true);
             setIsSwitchLoading(false);
             try {
-                const response = await axios.get<ApiResponse>('/api/get-messages');
+                const response = await goapi.get<ApiResponse>(`/api/messages/`);
                 setMessages(response.data.messages || []);
                 if (refresh) {
                     toast({
@@ -83,23 +82,24 @@ function UserMessagesDashboard() {
                 setIsSwitchLoading(false);
             }
         },
-        [setIsLoading, setMessages, toast]
+        [setMessages]
     );
 
     // Fetch initial state from the server
     useEffect(() => {
         if (!user) return;
+        console.log("Loading messages for user:", user);
 
         fetchMessages();
 
         fetchAcceptMessages();
-    }, [user, setValue, toast, fetchAcceptMessages, fetchMessages]);
+    }, [user, fetchAcceptMessages, fetchMessages]);
 
     // Handle switch change
     const handleSwitchChange = async () => {
         try {
-            const response = await axios.patch<ApiResponse>(`${process.env.NEXT_PUBLIC_GOSERVER_BASE_URL}/api/user/${user?.id}/accept-messages`, {
-                acceptMessages: !acceptMessages,
+            const response = await goapi.patch<ApiResponse>(`/api/user/${user?.id}/accept-messages`, {
+                isAcceptingMessages: !acceptMessages,
             });
             setValue('acceptMessages', !acceptMessages);
             toast({
