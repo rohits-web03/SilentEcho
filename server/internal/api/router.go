@@ -28,6 +28,14 @@ func SetupRouter(rmq *queue.RabbitMQ) *gin.Engine {
 			authRouter.POST("/logout", authHandler.Logout)
 		}
 
+		{
+			messageRouter := apiRouter.Group("/messages")
+			messageRouter.Use(middleware.AuthMiddleware())
+			messageRouter.POST("/", handlers.SendMessage)
+			messageRouter.GET("/", handlers.GetMessages)
+			messageRouter.DELETE("/:id", handlers.DeleteMessage)
+		}
+
 		// Notes
 		{
 			noteRouter := apiRouter.Group("/notes")

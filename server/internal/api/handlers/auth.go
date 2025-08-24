@@ -13,7 +13,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/google/uuid"
 	"github.com/rohits-web03/SilentEcho/server/internal/config"
 	"github.com/rohits-web03/SilentEcho/server/internal/models"
 	"github.com/rohits-web03/SilentEcho/server/internal/queue"
@@ -79,7 +78,6 @@ func (h *AuthHandler) RegisterUser(c *gin.Context) {
 	} else { // new user
 		hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.DefaultCost)
 		newUser := models.User{
-			ID:                  uuid.New(), // Postgres UUID
 			Username:            input.Username,
 			Email:               input.Email,
 			Password:            string(hashedPassword),

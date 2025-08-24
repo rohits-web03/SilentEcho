@@ -59,7 +59,7 @@ func CheckUsername(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"success": true, "isUnique": true})
 }
 
-// PATCH //api/user:id/accept-messages
+// PATCH /api/user/:id/accept-messages
 func AcceptMessages(c *gin.Context) {
 	userID := c.Param("id")
 	uid, err := uuid.Parse(userID)
