@@ -29,13 +29,17 @@ func GetUserInfo(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"id":                  user.ID,
-		"username":            user.Username,
-		"email":               user.Email,
-		"isVerified":          user.IsVerified,
-		"isAcceptingMessages": user.IsAcceptingMessages,
-		"createdAt":           user.CreatedAt,
-		"updatedAt":           user.UpdatedAt,
+		"success": true,
+		"message": "User info fetched successfully",
+		"data": gin.H{
+			"id":                  user.ID,
+			"username":            user.Username,
+			"email":               user.Email,
+			"isVerified":          user.IsVerified,
+			"isAcceptingMessages": user.IsAcceptingMessages,
+			"createdAt":           user.CreatedAt,
+			"updatedAt":           user.UpdatedAt,
+		},
 	})
 }
 
@@ -51,12 +55,12 @@ func CheckUsername(c *gin.Context) {
 	err := repositories.DB.Where("username = ?", username).First(&user).Error
 	if err == nil {
 		// found → not unique
-		c.JSON(http.StatusOK, gin.H{"success": true, "isUnique": false})
+		c.JSON(http.StatusOK, gin.H{"success": true, "message": "Username already exists", "data": gin.H{"isUnique": false}})
 		return
 	}
 
 	// not found, username is unique
-	c.JSON(http.StatusOK, gin.H{"success": true, "isUnique": true})
+	c.JSON(http.StatusOK, gin.H{"success": true, "message": "Username is available", "data": gin.H{"isUnique": true}})
 }
 
 // PATCH /api/user/:id/accept-messages
@@ -97,9 +101,8 @@ func AcceptMessages(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"success":             true,
-		"message":             "User preference updated",
-		"isAcceptingMessages": input.IsAcceptingMessages,
+		"success": true,
+		"message": "User preference updated",
 	})
 }
 
@@ -120,9 +123,9 @@ func GetAcceptMessagesStatus(c *gin.Context) {
 
 	var user models.User
 	if err := repositories.DB.Where("id = ?", uid).First(&user).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "message": "Failed to fetch user"})
+		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "message": "Failed to fetch user preference"})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"success": true, "isAcceptingMessages": user.IsAcceptingMessages})
+	c.JSON(http.StatusOK, gin.H{"success": true, "message": "User preference fetched successfully", "data": gin.H{"isAcceptingMessages": user.IsAcceptingMessages}})
 }

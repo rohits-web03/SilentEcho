@@ -70,14 +70,14 @@ func GetMessages(c *gin.Context) {
 
 	if len(messages) == 0 {
 		c.JSON(http.StatusOK, gin.H{
-			"success":  true,
-			"message":  "No messages received yet",
-			"messages": []models.Message{},
+			"success": true,
+			"message": "No messages received yet",
+			"data":    []models.Message{},
 		})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"success": true, "message": "Messages fetched successfully", "messages": messages})
+	c.JSON(http.StatusOK, gin.H{"success": true, "message": "Messages fetched successfully", "data": messages})
 }
 
 // DELETE /api/messages/:id

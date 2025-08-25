@@ -22,14 +22,14 @@ func CreateNote(c *gin.Context) {
 	}
 
 	if err := c.BindJSON(&input); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
+		c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": "Invalid input"})
 		return
 	}
 
 	// Convert userId string -> UUID
 	userID, err := uuid.Parse(input.UserID)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid userId format"})
+		c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": "Invalid userId format"})
 		return
 	}
 
@@ -42,11 +42,11 @@ func CreateNote(c *gin.Context) {
 	}
 
 	if err := repositories.DB.Create(&note).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create note"})
+		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "message": "Failed to create note"})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"id": note.ID})
+	c.JSON(http.StatusOK, gin.H{"success": true, "message": "Note created successfully", "data": gin.H{"id": note.ID}})
 }
 
 // GET /note/:slug
@@ -54,7 +54,7 @@ func GetNote(c *gin.Context) {
 	slugParam := c.Param("slug")
 
 	if slugParam == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Slug parameter cannot be empty"})
+		c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": "Slug parameter cannot be empty"})
 		return
 	}
 
@@ -62,18 +62,22 @@ func GetNote(c *gin.Context) {
 
 	if err := repositories.DB.Where("slug = ?", slugParam).First(&note).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			c.JSON(http.StatusNotFound, gin.H{"error": "Note not found"})
+			c.JSON(http.StatusNotFound, gin.H{"success": false, "message": "Note not found"})
 		} else {
 			log.Printf("Error fetching note by slug %s: %v\n", slugParam, err)
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch note"})
+			c.JSON(http.StatusInternalServerError, gin.H{"success": false, "message": "Failed to fetch note"})
 		}
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"ciphernote": note.CipherNote,
-		"createdAt":  note.CreatedAt,
-		"expiresAt":  note.ExpiresAt,
+		"success": true,
+		"message": "Note fetched successfully",
+		"data": gin.H{
+			"ciphernote": note.CipherNote,
+			"createdAt":  note.CreatedAt,
+			"expiresAt":  note.ExpiresAt,
+		},
 	})
 }
 
@@ -85,14 +89,14 @@ func GetUserNotes(c *gin.Context) {
 
 	if err := repositories.DB.Where("user_id = ?", userIdParam).Find(&notes).Error; err != nil {
 		log.Printf("Error finding notes for user %s: %v\n", userIdParam, err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to query notes"})
+		c.JSON(http.StatusInternalServerError, gin.H{"success": false, "message": "Failed to query notes"})
 		return
 	}
 
-	c.JSON(http.StatusOK, notes)
+	c.JSON(http.StatusOK, gin.H{"success": true, "message": "Notes fetched successfully", "data": notes})
 }
 
 // GET /
 func Welcome(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{"message": "Welcome to SilentNotes"})
+	c.JSON(http.StatusOK, gin.H{"success": true, "message": "Welcome to SilentNotes"})
 }
