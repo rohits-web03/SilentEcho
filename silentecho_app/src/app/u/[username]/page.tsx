@@ -64,7 +64,7 @@ export default function SendMessage() {
   const onSubmit = async (data: z.infer<typeof messageSchema>) => {
     setIsLoading(true);
     try {
-      const response = await goapi.post<ApiResponse>(`/api/messages/`, {
+      const response = await goapi.post<ApiResponse<unknown>>(`/api/messages/`, {
         ...data,
         username,
       });
@@ -75,7 +75,7 @@ export default function SendMessage() {
       });
       form.reset({ ...form.getValues(), content: '' });
     } catch (error) {
-      const axiosError = error as AxiosError<ApiResponse>;
+      const axiosError = error as AxiosError<ApiResponse<unknown>>;
       toast({
         title: 'Error',
         description:

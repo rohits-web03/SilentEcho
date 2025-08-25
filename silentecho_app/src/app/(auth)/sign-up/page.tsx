@@ -7,7 +7,7 @@ import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useDebounce } from 'usehooks-ts';
 import * as z from 'zod';
-
+import { isUnique } from '@/types/ApiResponse';
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -50,20 +50,20 @@ export default function SignUpForm() {
         setIsCheckingUsername(true);
         setUsernameMessage(''); // Reset message
         try {
-          const response = await goapi.get(
+          const response = await goapi.get<ApiResponse<isUnique>>(
             `/api/user/check-username`,
             {
               params: { username: debouncedUsername },
             }
           );
 
-          if (response.data.isUnique) {
+          if (response.data.data?.isUnique) {
             setUsernameMessage('Username is unique');
           } else {
             setUsernameMessage('Username is already taken');
           }
         } catch (error) {
-          const axiosError = error as AxiosError<ApiResponse>;
+          const axiosError = error as AxiosError<ApiResponse<unknown>>;
           setUsernameMessage(
             axiosError.response?.data.message ?? 'Error checking username'
           );
@@ -78,7 +78,7 @@ export default function SignUpForm() {
   const onSubmit = async (data: z.infer<typeof signUpSchema>) => {
     setIsSubmitting(true);
     try {
-      const response = await goapi.post<ApiResponse>(
+      const response = await goapi.post<ApiResponse<unknown>>(
         `/api/auth/sign-up`,
         data
       );
@@ -94,7 +94,7 @@ export default function SignUpForm() {
     } catch (error) {
       console.error('Error during sign-up:', error);
 
-      const axiosError = error as AxiosError<ApiResponse>;
+      const axiosError = error as AxiosError<ApiResponse<unknown>>;
 
       let errorMessage =
         axiosError.response?.data.message ??

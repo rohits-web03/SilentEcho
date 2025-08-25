@@ -1,6 +1,6 @@
 'use client';
 
-import { Note } from '@/model/Note';
+import { Note } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Trash, Link as LinkIcon, Clock } from 'lucide-react';
@@ -27,6 +27,7 @@ export function NoteCard({ note, onDelete }: NoteCardProps) {
 
     const handleDelete = async () => {
         console.log("Deleting Note...");
+        onDelete(note.id);
         // try {
         //     await axios.delete(`/api/notes/${note.slug}`);
         //     toast({

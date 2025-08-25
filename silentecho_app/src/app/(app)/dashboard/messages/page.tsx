@@ -5,8 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/components/ui/use-toast';
-import { Message } from '@/model/User';
-import { ApiResponse } from '@/types/ApiResponse';
+import { Message } from '@/types';
+import { ApiResponse, acceptMessagesStatus } from '@/types/ApiResponse';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { AxiosError } from 'axios';
 import { Copy, Loader2, MailQuestion, RefreshCcw } from 'lucide-react';
@@ -38,12 +38,13 @@ function UserMessagesDashboard() {
     const acceptMessages = watch('acceptMessages');
 
     const fetchAcceptMessages = useCallback(async () => {
+        if (!user) return;
         setIsSwitchLoading(true);
         try {
-            const response = await goapi.get<ApiResponse>(`/api/user/${user?.id}/accept-messages`);
-            setValue('acceptMessages', response.data.isAcceptingMessages);
+            const response = await goapi.get<ApiResponse<acceptMessagesStatus>>(`/api/user/${user?.id}/accept-messages`);
+            setValue('acceptMessages', response.data.data?.isAcceptingMessages);
         } catch (error) {
-            const axiosError = error as AxiosError<ApiResponse>;
+            const axiosError = error as AxiosError<ApiResponse<unknown>>;
             toast({
                 title: 'Error',
                 description:
@@ -54,15 +55,15 @@ function UserMessagesDashboard() {
         } finally {
             setIsSwitchLoading(false);
         }
-    }, [user?.id]);
+    }, [setValue, toast, user]);
 
     const fetchMessages = useCallback(
         async (refresh: boolean = false) => {
             setIsLoading(true);
             setIsSwitchLoading(false);
             try {
-                const response = await goapi.get<ApiResponse>(`/api/messages/`);
-                setMessages(response.data.messages || []);
+                const response = await goapi.get<ApiResponse<Message[]>>(`/api/messages/`);
+                setMessages(response.data.data || []);
                 if (refresh) {
                     toast({
                         title: 'Refreshed Messages',
@@ -70,7 +71,7 @@ function UserMessagesDashboard() {
                     });
                 }
             } catch (error) {
-                const axiosError = error as AxiosError<ApiResponse>;
+                const axiosError = error as AxiosError<ApiResponse<unknown>>;
                 toast({
                     title: 'Error',
                     description:
@@ -82,7 +83,7 @@ function UserMessagesDashboard() {
                 setIsSwitchLoading(false);
             }
         },
-        [setMessages]
+        [setMessages, toast]
     );
 
     // Fetch initial state from the server
@@ -98,7 +99,7 @@ function UserMessagesDashboard() {
     // Handle switch change
     const handleSwitchChange = async () => {
         try {
-            const response = await goapi.patch<ApiResponse>(`/api/user/${user?.id}/accept-messages`, {
+            const response = await goapi.patch<ApiResponse<void>>(`/api/user/${user?.id}/accept-messages`, {
                 isAcceptingMessages: !acceptMessages,
             });
             setValue('acceptMessages', !acceptMessages);
@@ -107,7 +108,7 @@ function UserMessagesDashboard() {
                 variant: 'default',
             });
         } catch (error) {
-            const axiosError = error as AxiosError<ApiResponse>;
+            const axiosError = error as AxiosError<ApiResponse<unknown>>;
             toast({
                 title: 'Error',
                 description:
@@ -213,7 +214,7 @@ function UserMessagesDashboard() {
                     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                         {messages.map((message, index) => (
                             <motion.div
-                                key={message._id as React.Key}
+                                key={message.id as React.Key}
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: index * 0.05 }}

@@ -1,20 +1,17 @@
-import { Note } from "@/model/Note";
-import { Message } from "@/model/User";
+import { Note } from "@/types";
+import { Message } from "@/types";
+import { User } from "@/types";
 
-export interface ApiResponse {
-  success: boolean;
-  message: string;
-  isAcceptingMessages?: boolean;
-  messages?: Array<Message>
-};
-
-export interface NoteData {
-  ciphernote: string;
-  createdAt?: string;
-  expiresAt?: string | null;
+export interface isUnique {
+  isUnique: boolean;
 }
 
-export interface GoApiResponse {
-  data: Note[];
+export interface acceptMessagesStatus {
+  isAcceptingMessages: boolean;
+}
+
+export interface ApiResponse<T> {
+  success: boolean;
   message: string;
-};
+  data?: T;
+}

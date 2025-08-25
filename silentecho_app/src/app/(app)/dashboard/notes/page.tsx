@@ -7,8 +7,8 @@ import { useToast } from '@/components/ui/use-toast';
 import { FileText, Loader2, PlusCircle, RefreshCcw } from 'lucide-react';
 import { AxiosError } from 'axios';
 import React, { useCallback, useEffect, useState } from 'react';
-import { Note } from '@/model/Note';
-import { GoApiResponse } from '@/types/ApiResponse';
+import { Note } from '@/types';
+import { ApiResponse } from '@/types/ApiResponse';
 import { useAuth } from '@/hooks/useAuth';
 import { NoteCard } from '@/components/NoteCard';
 import CreateNoteDialog from '@/components/CreateNoteDialog';
@@ -28,12 +28,12 @@ export default function CipherNotesDashboard() {
 
         setIsLoading(true);
         try {
-            const response = await goapi.get<GoApiResponse>(`/api/notes/user/${user.id}`);
+            const response = await goapi.get<ApiResponse<Note[]>>(`/api/notes/user/${user.id}`);
             const { data: apiData } = response;
-            console.log(apiData);
-            setNotes(apiData || []);
+            // console.log(apiData);
+            setNotes(apiData.data || []);
         } catch (error) {
-            const axiosError = error as AxiosError<GoApiResponse>;
+            const axiosError = error as AxiosError<ApiResponse<unknown>>;
             toast({
                 title: 'Error',
                 description: axiosError.response?.data.message ?? 'Failed to fetch notes',
@@ -42,15 +42,15 @@ export default function CipherNotesDashboard() {
         } finally {
             setIsLoading(false);
         }
-    }, [user?.id]);
+    }, [toast, user]);
 
     useEffect(() => {
         if (!user) return;
         fetchNotes();
-    }, [user, fetchNotes, user?.id]);
+    }, [fetchNotes, user]);
 
     const handleDeleteNote = (noteId: string) => {
-        setNotes(notes.filter((note) => note._id !== noteId));
+        setNotes(notes.filter((note) => note.id !== noteId));
     };
 
     if (!user) {

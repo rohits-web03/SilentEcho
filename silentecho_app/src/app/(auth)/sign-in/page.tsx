@@ -20,6 +20,7 @@ import { ArrowRight } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { signInSchema } from '@/schemas/signInSchema';
 import { goapi } from '@/lib/utils';
+import { ApiResponse } from '@/types/ApiResponse';
 
 export default function SignInForm() {
   const router = useRouter();
@@ -36,7 +37,7 @@ export default function SignInForm() {
 
   const onSubmit = async (data: z.infer<typeof signInSchema>) => {
     try {
-      const response = await goapi.post(
+      const response = await goapi.post<ApiResponse<unknown>>(
         `/api/auth/login`,
         {
           username: data.username,

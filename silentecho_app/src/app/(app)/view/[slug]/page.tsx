@@ -4,8 +4,9 @@ import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import { AxiosError } from 'axios';
 import { decryptNote } from '@/lib/utils';
-import { NoteData } from '@/types/ApiResponse';
+import { ApiResponse } from '@/types/ApiResponse';
 import { goapi } from '@/lib/utils';
+import { Note } from '@/types';
 
 export default function Page() {
     const params = useParams();
@@ -42,24 +43,16 @@ export default function Page() {
             setNoteCiphertext(null);
 
             try {
-                const response = await goapi.get<NoteData>(`/api/notes/${slug}`);
+                const response = await goapi.get<ApiResponse<Note>>(`/api/notes/${slug}`);
                 console.log(response.data);
-                if (response.data?.ciphernote) {
-                    setNoteCiphertext(response.data.ciphernote);
+                if (response.data?.data?.ciphernote) {
+                    setNoteCiphertext(response.data.data.ciphernote);
                 } else {
                     setError("Fetched note data is incomplete (missing ciphertext).");
                 }
-            } catch (err: any) {
-                console.error("Fetch error:", err);
-                if (err instanceof AxiosError) {
-                    if (err.response?.status === 404) {
-                        setError(`Note with slug "${slug}" not found.`);
-                    } else {
-                        setError(`Server error: ${err.response?.status || 'Unknown'} - Failed to fetch the note.`);
-                    }
-                } else {
-                    setError("An unexpected error occurred while fetching the note.");
-                }
+            } catch (error) {
+                const axiosError = error as AxiosError<ApiResponse<unknown>>;
+                setError(axiosError.response?.data.message ?? 'Failed to fetch note');
             } finally {
                 setIsLoading(false);
             }

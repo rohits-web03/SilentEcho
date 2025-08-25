@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { AuthState, User } from '@/types';
+import { ApiResponse } from '@/types/ApiResponse';
 import { goapi } from '@/lib/utils';
 
 export function useAuth() {
@@ -14,8 +15,8 @@ export function useAuth() {
     useEffect(() => {
         const fetchUser = async () => {
             try {
-                const res = await goapi.get<User>(`/api/user/info`);
-                setAuth({ user: res.data, loading: false, error: null });
+                const res = await goapi.get<ApiResponse<User>>(`/api/user/info`);
+                setAuth({ user: res.data.data || null, loading: false, error: null });
             } catch (err: any) {
                 console.error('Failed to fetch user info:', err);
                 setAuth({ user: null, loading: false, error: err.response?.data?.error || 'Unauthorized' });

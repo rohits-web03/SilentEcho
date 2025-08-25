@@ -30,7 +30,7 @@ export default function VerifyAccount() {
   });
   const onSubmit = async (data: z.infer<typeof verifySchema>) => {
     try {
-      const response = await goapi.post<ApiResponse>(
+      const response = await goapi.post<ApiResponse<unknown>>(
         `/api/auth/verify-code`,
         {
           username: params.username,
@@ -45,7 +45,7 @@ export default function VerifyAccount() {
 
       router.replace('/sign-in');
     } catch (error) {
-      const axiosError = error as AxiosError<ApiResponse>;
+      const axiosError = error as AxiosError<ApiResponse<unknown>>;
       toast({
         title: 'Verification Failed',
         description:

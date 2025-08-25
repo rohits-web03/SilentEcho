@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { AxiosError } from 'axios';
 import dayjs from 'dayjs';
 import { X } from 'lucide-react';
-import { Message } from '@/model/User';
+import { Message } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   AlertDialog,
@@ -32,16 +32,15 @@ export function MessageCard({ message, onMessageDelete }: MessageCardProps) {
 
   const handleDeleteConfirm = async () => {
     try {
-      const response = await goapi.delete<ApiResponse>(
+      const response = await goapi.delete<ApiResponse<unknown>>(
         `/api/messages/${message.id}`
       );
       toast({
         title: response.data.message,
       });
       onMessageDelete(message.id);
-
     } catch (error) {
-      const axiosError = error as AxiosError<ApiResponse>;
+      const axiosError = error as AxiosError<ApiResponse<unknown>>;
       toast({
         title: 'Error',
         description:

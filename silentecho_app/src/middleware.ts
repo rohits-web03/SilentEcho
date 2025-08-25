@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import axios, { AxiosError } from 'axios';
 import { User } from '@/types';
+import { ApiResponse } from '@/types/ApiResponse';
 
 export const config = {
   matcher: ['/dashboard/:path*', '/sign-in', '/sign-up', '/', '/verify/:path*'],
@@ -14,7 +15,7 @@ export async function middleware(req: NextRequest) {
   // If token exists, validate it by fetching user info
   if (token) {
     try {
-      const res = await axios.get<User>(
+      const res = await axios.get<ApiResponse<User>>(
         `${process.env.NEXT_PUBLIC_GOSERVER_BASE_URL}/api/user/info`,
         {
           headers: {
@@ -22,8 +23,8 @@ export async function middleware(req: NextRequest) {
           },
         }
       );
-      if (res.data) {
-        user = res.data;
+      if (res.data.data) {
+        user = res.data.data;
         // If user is authenticated and tries to go to auth pages → redirect to dashboard
         if (
           url.pathname.startsWith('/sign-in') ||
