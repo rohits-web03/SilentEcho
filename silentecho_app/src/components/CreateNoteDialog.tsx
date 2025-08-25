@@ -60,7 +60,7 @@ export default function CreateNoteDialog({ userId, open, onOpenChange, onNoteCre
                 payload.expiresAt = expiresAt.toISOString();
             }
 
-            await goapi.post(`/api/note`, payload);
+            await goapi.post(`/api/notes/`, payload);
 
             toast({ title: 'Note Created', description: 'Encrypted note saved successfully.' });
 
@@ -80,9 +80,6 @@ export default function CreateNoteDialog({ userId, open, onOpenChange, onNoteCre
 
     return (
         <AlertDialog open={open} onOpenChange={onOpenChange}>
-            <AlertDialogTrigger asChild>
-                <Button>Create Note</Button>
-            </AlertDialogTrigger>
             <AlertDialogContent className="sm:max-w-md">
                 <div className='flex justify-between items-center'>
                     <AlertDialogHeader>

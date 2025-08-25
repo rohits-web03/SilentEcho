@@ -17,6 +17,7 @@ func SetupRouter(rmq *queue.RabbitMQ) *gin.Engine {
 	// Routes
 	{
 		apiRouter := router.Group("/api")
+
 		// Auth
 		{
 			authRouter := apiRouter.Group("/auth")
@@ -40,23 +41,19 @@ func SetupRouter(rmq *queue.RabbitMQ) *gin.Engine {
 		// Notes
 		{
 			noteRouter := apiRouter.Group("/notes")
+			noteRouter.GET("/:slug", handlers.GetNote)
 			noteRouter.Use(middleware.AuthMiddleware())
 			noteRouter.POST("/", handlers.CreateNote)
-			noteRouter.GET("/:slug", handlers.GetNote)
 			noteRouter.GET("/user/:userId", handlers.GetUserNotes)
 		}
 
 		// Users
 		{
 			userRouter := apiRouter.Group("/user")
-			// GET /api/user/check-username?username=xyz
 			userRouter.GET("/check-username", handlers.CheckUsername)
 			userRouter.Use(middleware.AuthMiddleware())
-			// GET /api/user/info
 			userRouter.GET("/info", handlers.GetUserInfo)
-			// GET /api/user/:id/accept-messages
 			userRouter.GET("/:id/accept-messages", handlers.GetAcceptMessagesStatus)
-			// PATCH /api/user/:id/accept-messages
 			userRouter.PATCH("/:id/accept-messages", handlers.AcceptMessages)
 		}
 
@@ -66,10 +63,6 @@ func SetupRouter(rmq *queue.RabbitMQ) *gin.Engine {
 		// Test
 		apiRouter.GET("/ping", func(c *gin.Context) {
 			c.JSON(http.StatusOK, gin.H{"message": "pong"})
-		})
-
-		apiRouter.GET("/test-cors", func(c *gin.Context) {
-			c.JSON(200, gin.H{"msg": "CORS working"})
 		})
 	}
 

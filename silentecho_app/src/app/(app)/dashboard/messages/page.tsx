@@ -88,7 +88,7 @@ function UserMessagesDashboard() {
     // Fetch initial state from the server
     useEffect(() => {
         if (!user) return;
-        console.log("Loading messages for user:", user);
+        // console.log("Loading messages for user:", user);
 
         fetchMessages();
 
@@ -187,33 +187,22 @@ function UserMessagesDashboard() {
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <div className="flex flex-col sm:flex-row gap-2">
-                        <div className="relative flex-1">
-                            <input
-                                type="text"
-                                value={profileUrl}
-                                readOnly
-                                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 pr-10"
-                            />
-                            <Button
-                                type="button"
-                                variant="ghost"
-                                size="icon"
-                                className="absolute right-0 top-0 h-full px-3"
-                                onClick={copyToClipboard}
-                            >
-                                <Copy className="h-4 w-4" />
-                                <span className="sr-only">Copy link</span>
-                            </Button>
-                        </div>
+                    <div className="relative flex-1">
+                        <input
+                            type="text"
+                            value={profileUrl}
+                            readOnly
+                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 pr-10"
+                        />
                         <Button
-                            variant="outline"
-                            size="sm"
-                            className="shrink-0"
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="absolute right-0 top-0 h-full px-3"
                             onClick={copyToClipboard}
                         >
-                            <Copy className="h-4 w-4 mr-2" />
-                            Copy
+                            <Copy className="h-4 w-4" />
+                            <span className="sr-only">Copy link</span>
                         </Button>
                     </div>
                 </CardContent>

@@ -30,7 +30,8 @@ export default function CipherNotesDashboard() {
         try {
             const response = await goapi.get<GoApiResponse>(`/api/notes/user/${user.id}`);
             const { data: apiData } = response;
-            setNotes(apiData.data || []);
+            console.log(apiData);
+            setNotes(apiData || []);
         } catch (error) {
             const axiosError = error as AxiosError<GoApiResponse>;
             toast({
@@ -41,7 +42,7 @@ export default function CipherNotesDashboard() {
         } finally {
             setIsLoading(false);
         }
-    }, [toast, user?.id]);
+    }, [user?.id]);
 
     useEffect(() => {
         if (!user) return;
@@ -61,11 +62,6 @@ export default function CipherNotesDashboard() {
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight">Cipher Notes</h1>
-                    <p className="text-muted-foreground">
-                        {notes.length > 0
-                            ? `You have ${notes.length} ${notes.length === 1 ? 'note' : 'notes'}`
-                            : 'No notes yet'}
-                    </p>
                 </div>
 
                 <div className="flex items-center space-x-4">
@@ -121,14 +117,6 @@ export default function CipherNotesDashboard() {
                             <p className="text-sm text-muted-foreground max-w-md mb-4">
                                 Create your first encrypted note to get started
                             </p>
-                            <Button
-                                onClick={() => setShowDialog(true)}
-                                className="mt-2"
-                                size="sm"
-                            >
-                                <PlusCircle className="h-4 w-4 mr-2" />
-                                Create Note
-                            </Button>
                         </CardContent>
                     </Card>
                 )}

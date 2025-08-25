@@ -3,7 +3,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import { AxiosError } from 'axios';
-
 import { decryptNote } from '@/lib/utils';
 import { NoteData } from '@/types/ApiResponse';
 import { goapi } from '@/lib/utils';
@@ -16,6 +15,7 @@ export default function Page() {
     const [decryptedContent, setDecryptedContent] = useState<string | null>(null);
     const [password, setPassword] = useState<string>('');
     const [noteCiphertext, setNoteCiphertext] = useState<string | null>(null);
+    const [isInitialLoad, setIsInitialLoad] = useState(true);
 
     // Extract Password from URL Hash (#) 
     useEffect(() => {
@@ -25,7 +25,7 @@ export default function Page() {
                 setPassword(hash.substring(1)); // Remove leading '#'
             }
         }
-    }, [setPassword]);
+    }, []);
 
     // Fetch Note Data when Slug is Available
     useEffect(() => {
@@ -42,15 +42,12 @@ export default function Page() {
             setNoteCiphertext(null);
 
             try {
-                const apiUrl = `${process.env.NEXT_PUBLIC_GOSERVER_BASE_URL}/api/note/${slug}`;
-
-                const response = await goapi.get<NoteData>(apiUrl);
-
-                if (response.data && response.data.ciphernote) {
+                const response = await goapi.get<NoteData>(`/api/notes/${slug}`);
+                console.log(response.data);
+                if (response.data?.ciphernote) {
                     setNoteCiphertext(response.data.ciphernote);
                 } else {
                     setError("Fetched note data is incomplete (missing ciphertext).");
-                    setIsLoading(false);
                 }
             } catch (err: any) {
                 console.error("Fetch error:", err);
@@ -63,6 +60,7 @@ export default function Page() {
                 } else {
                     setError("An unexpected error occurred while fetching the note.");
                 }
+            } finally {
                 setIsLoading(false);
             }
         };
@@ -71,26 +69,14 @@ export default function Page() {
     }, [slug]);
 
     // Attempt Decryption When Ciphertext and Password are Ready
-    const attemptDecryption = useCallback(async () => {
-        if (!noteCiphertext) {
-            if (!isLoading && !error) setError("Note data not available for decryption.");
-            return;
-        }
-
-        if (!password) {
-            setError("Password missing from URL fragment (e.g., add #yourPassword to the end of the URL).");
-            setIsLoading(false);
-            return;
-        }
-
+    const attemptDecryption = useCallback(async (ciphertext: string, pass: string) => {
+        console.log("Attempting decryption...");
         setIsLoading(true);
         setError(null);
 
         try {
-            //console.log("Attempting decryption..."); 
-            const plaintext = await decryptNote(password, noteCiphertext);
+            const plaintext = await decryptNote(pass, ciphertext);
             setDecryptedContent(plaintext);
-            //console.log("Decryption successful.");
         } catch (decryptionError: any) {
             console.error("Decryption error:", decryptionError);
             setError("Decryption failed. The password might be incorrect or the note data could be corrupted.");
@@ -98,17 +84,22 @@ export default function Page() {
         } finally {
             setIsLoading(false);
         }
-    }, [noteCiphertext, password]);
+    }, []);
 
+    // Handle decryption when both ciphertext and password are available
     useEffect(() => {
-        if (noteCiphertext && password && !error) {
-            attemptDecryption();
+        if (isInitialLoad && noteCiphertext && password) {
+            setIsInitialLoad(false);
+            attemptDecryption(noteCiphertext, password);
         }
-        else if (!isLoading && noteCiphertext && !password) {
+    }, [noteCiphertext, password, attemptDecryption, isInitialLoad]);
+
+    // Handle case when password is missing
+    useEffect(() => {
+        if (noteCiphertext && !password && !isLoading && !error) {
             setError("Password missing from URL fragment (e.g., add #yourPassword to the end of the URL).");
         }
-
-    }, [noteCiphertext, password, attemptDecryption, error, isLoading]);
+    }, [noteCiphertext, password, isLoading, error]);
 
     return (
         <div className="container mx-auto p-4 max-w-2xl">
@@ -135,10 +126,10 @@ export default function Page() {
 
             {/* Display decrypted content on success */}
             {decryptedContent && !isLoading && !error && (
-                <div className="mt-4 p-4 border rounded bg-gray-50 shadow-sm">
-                    <h2 className="text-xl font-semibold mb-3 text-gray-800">Decrypted Content:</h2>
+                <div className="mt-4 p-4 border rounded bg-gray-50 dark:bg-gray-800 shadow-sm">
+                    <h2 className="text-xl font-semibold mb-3 text-gray-800 dark:text-white">Decrypted Content:</h2>
                     {/* Using 'whitespace-pre-wrap' to respect newlines and wrap long lines */}
-                    <pre className="whitespace-pre-wrap font-mono text-sm text-gray-700 bg-white p-3 rounded border">
+                    <pre className="whitespace-pre-wrap font-mono text-sm text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 p-3 rounded border">
                         {decryptedContent}
                     </pre>
                 </div>
